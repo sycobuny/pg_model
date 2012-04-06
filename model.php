@@ -243,12 +243,16 @@ COLQUERY;
          * Returns a piece of a form element which will fill in the value
          * currently in the model.
          */
-        public function form($name, $comparison = NULL) {
+        public function form($name, $comparison = NULL, $echo = TRUE) {
             if (!array_key_exists($name, $this->columns))
                 return;
 
-            $col   = $this->columns[$name];
-            return $col->formify($this->column($name), $comparison);
+            $col = $this->columns[$name];
+            $val = $col->formify($this->column($name), $comparison);
+
+            if ($echo)
+                echo $val;
+            return $val;
         }
 
         /* public Model->display(String)
