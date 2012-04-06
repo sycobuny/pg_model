@@ -83,15 +83,15 @@
          * suitable for filling in the current value.
          */
         public function formify($value, $comparison = NULL) {
-            if ($value == NULL)
+            if ($value === NULL)
                 return '';
 
-            if ($value == $comparison)
-                return ' checked="checked"';
+            if (($comparison !== NULL) && ($value == $comparison))
+                return ' checked';
 
             switch ($this->datatype) {
                 case 'boolean':
-                    return $value ? ' checked="checked"' : '';
+                    return $value ? ' checked' : '';
                 case 'date':
                     return ' value="' . $value->to_s() . '"';
                 default:
@@ -106,7 +106,7 @@
          * the database (eg, INSERT or UPDATE queries).
          */
         public function prep_for_database($value) {
-            if ($value == NULL)
+            if ($value === NULL)
                 return NULL;
 
             switch ($this->datatype) {
