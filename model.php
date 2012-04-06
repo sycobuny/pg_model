@@ -159,6 +159,60 @@ COLQUERY;
             return $this;
         }
 
+        /* public Model->save()
+         * returns $this
+         *
+         * Saves the data to the database. This method knows whether or not to
+         * run an INSERT or an UPDATE operation based on whether primary keys
+         * have already been set on this object. It also resets the clean and
+         * dirty states to whatever the current values of the table are when the
+         * query completes.
+         */
+        public function save() {
+            $pkeys = $this->primary_keys();
+
+            if ($this->clean[ $pkeys[0] ])
+                return $this->_update();
+            else
+                return $this->_insert();
+        }
+
+        /* protected Model->_insert()
+         * returns $this;
+         *
+         * Runs an INSERT query against the database, based on the current
+         * contents of the "dirty" array.
+         */
+         protected function _insert() {
+             $table = $this->table();
+             $cols  = $this->columns();
+
+             $names = Array();
+             $holds = Array();
+             $vals  = Array();
+
+             $x = 1;
+             foreach ($cols as $name => $col) {
+                 if ($col->primary_key()) continue;
+                 $val = $col->prep_for_database($this->column($name));
+
+                 array_push($names, $name);
+                 array_push($holds, '$' . $x++);
+                 array_push($vals,  $val);
+             }
+
+             $names = join(', ', $names);
+             $holds = join(', ', $holds);
+
+             $query = "INSERT INTO $table ($names) VALUES ($holds) " .
+                      "RETURNING $names";
+
+             $results = $this->prefetch($query, $vals, "_insert_$table");
+             $this->_set_all($results[0]);
+
+             return $this;
+         }
+
         /* protected Model->_set_all(Array)
          * returns $this
          *
@@ -221,6 +275,16 @@ COLQUERY;
             sort($keys);
 
             return $keys;
+        }
+
+        public function primary_keys() {
+            $pkeys = Array();
+
+            foreach ($this->columns AS $name => $col)
+                if ($col->primary_key())
+                    array_push($pkeys, $name);
+
+            return $pkeys;
         }
 
         /* public Model->column(String)
