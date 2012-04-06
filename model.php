@@ -177,8 +177,8 @@ COLQUERY;
                 }
 
                 $col = $this->columns[$key];
-                $this->clean[$key] = $col->process($value);
-                $this->dirty[$key] = $col->process($value);
+                $this->clean[$key] = $col->process_value($value);
+                $this->dirty[$key] = $col->process_value($value);
             }
 
             return $this;
