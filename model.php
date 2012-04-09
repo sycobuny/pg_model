@@ -191,9 +191,12 @@ COLQUERY;
              $names = Array();
              $holds = Array();
              $vals  = Array();
+             $rets  = Array();
 
              $x = 1;
              foreach ($cols as $name => $col) {
+                 array_push($rets, $name);
+
                  if ($col->primary_key()) continue;
                  $val = $col->prep_for_database($this->column($name));
 
@@ -206,7 +209,7 @@ COLQUERY;
              $holds = join(', ', $holds);
 
              $query = "INSERT INTO $table ($names) VALUES ($holds) " .
-                      "RETURNING $names";
+                      "RETURNING $rets";
 
              $results = $this->prefetch($query, $vals, "_insert_$table");
              $this->_set_all($results[0]);
