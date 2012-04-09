@@ -178,6 +178,68 @@ COLQUERY;
                 return $this->_insert();
         }
 
+        /* protected Model->_update()
+         * returns $this;
+         *
+         * Runs an UPDATE query against the database, based on the current
+         * contents of the "dirty" array. Note that this query will return the
+         * current value of the database, and only update affected columns. This
+         * means that it MAY modify the object in unintended ways, but it WILL
+         * NOT modify the database beyond the object's scope.
+         */
+        protected function _update() {
+            $table = $this->table();
+            $cols  = $this->columns();
+
+            $sets  = Array();
+            $colx  = Array();
+            $vals  = Array();
+            $rets  = Array();
+            $where = Array();
+
+            $x = 1;
+            $y = 1;
+            foreach ($cols as $name => $col) {
+                array_push($rets, $name);
+
+                if ($this->clean[$name] !== $this->dirty[$name]) {
+                    $val = $col->prep_for_database($this->column($name));
+
+                    array_push($sets, "$name = \$$x");
+                    array_push($colx, $y);
+                    array_push($vals, $val);
+                    $x++;
+                }
+                $y++;
+            }
+
+            // nothing to do!
+            if (count($sets) == 0)
+                return $this;
+
+            foreach ($this->primary_keys() as $name) {
+                $col = $this->columns[$name];
+                $val = $col->prep_for_database($this->column($name));
+
+                array_push($where, "($name = \$$x)");
+                array_push($vals,  $val);
+                $x++;
+            }
+
+            $sets  = join(', ', $sets);
+            $colx  = join(',',  $colx);
+            $rets  = join(', ', $rets);
+            $where = "(" . join(' AND ', $where) . ")";
+            $name  = "_update_{$table}_$colx";
+
+            $query   = "UPDATE $table SET $sets WHERE $where RETURNING $rets";
+echo "<pre>\n$query</pre>\n";
+            $results = $this->prefetch($query, $vals, $name);
+
+            $this->_set_all($results[0]);
+            return $this;
+        }
+
         /* protected Model->_insert()
          * returns $this;
          *
