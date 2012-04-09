@@ -95,7 +95,7 @@ COLQUERY;
                 else
                     $name = '';
 
-                error_log("Preparing query: $str");
+                error_log("Preparing query ($name): $str");
                 pg_prepare(DB(), $name, $str);
             }
 
