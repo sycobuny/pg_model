@@ -65,7 +65,7 @@
         public function stringify($value) {
             switch ($this->datatype) {
                 case 'boolean':
-                    if ($value == NULL)
+                    if ($value === NULL)
                         return '?';
 
                     return $value ? 'Yes' : 'No';
