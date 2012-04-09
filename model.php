@@ -1,12 +1,15 @@
 <?php
 
+    include('lib.php');
+    include('database.php');
     include('column.php');
 
     abstract class Model {
-        private static $columns_list = Array();
-        private static $prepared     = Array();
+        private static $columns    = Array();
+        private static $tbl_lookup = Array();
+        private static $cls_lookup = Array();
 
-        private $columns;
+        private $cols;
         private $clean;
         private $dirty;
 
@@ -17,40 +20,32 @@
          * are set to NULL to prevent any "undefined key" errors.
          */
         function __construct() {
-            if ($columns =& self::$columns_list[(string) get_class($this)])
-                $this->columns =& $columns;
-            else {
-                $ary = $this->_colquery();
-
-                self::$columns_list[(string) get_class($this)] = Array();
-                $columns =& self::$columns_list[(string) get_class($this)];
-                $this->columns =& $columns;
-
-                foreach ($ary as $x => $row) {
-                    $name = $row['name'];
-                    $type = $row['db_type'];
-                    $null = $row['allow_null'];
-                    $pkey = $row['primary_key'];
-
-                    $null = $null == 't' ? TRUE : FALSE;
-                    $pkey = $pkey == 't' ? TRUE : FALSE;
-
-                    $columns[$name] = new Column($name, $type, $null, $pkey);
-                }
-            }
-
+            $this->cols(); // get the value and discard the result
             $this->_clear();
         }
 
-        /* private Model->_colquery()
+        /* public Model::associate_table(String, String)
+         * returns NULL
+         *
+         * Links a table to a class and vice versa. This is necessary because
+         * PHP 5.1 does not have particularly good class introspection.
+         */
+        public static function associate_table($table, $class) {
+            self::$tbl_lookup[$class] = $table;
+            self::$cls_lookup[$table] = $class;
+
+            return NULL;
+        }
+
+        /* private Model::_colquery()
          * returns Array
          *
          * Runs a query to fetch column definitions from a table. Returns the
          * dataset of rows of name, db_type, default, allow_null, and
          * primary_key for something else to process.
          */
-        private function _colquery() {
-            if (!array_key_exists('_colquery', self::$prepared))
+        private static function _colquery($table) {
+            if (!Database::prepared('_colquery'))
                 $str = <<<COLQUERY
 SELECT a.attname                                   AS "name",
        format_type(t.oid, a.atttypmod)             AS db_type,
@@ -74,72 +69,76 @@ COLQUERY;
                 $str = '';
 
             $str = preg_replace('/(\n|\s)+/m', ' ', $str);
-            return $this->prefetch($str, Array($this->table()), '_colquery');
+            return Database::prefetch($str, Array($table), '_colquery');
         }
 
-        /* public Model->query(String, [Array], [String])
-         * returns Resource
+        /* public Model::page([Integer], [Integer])
+         * returns Array
          *
-         * Runs a given query. If it is named, then it prepares the statement
-         * when it is run the first time, and then executes it. If the statement
-         * was already prepared based on the name, then it is just executed.
-         * Note that this means the query string is disregarded in future calls
-         * which involve the same prepared statement name.
+         * Returns the Nth "page" of objects, assuming Y objects per page.
+         * Defaults to assuming the first page, with 50 objects per page, is
+         * desired.
          */
-        public function query($str, $params = Array(), $name = NULL) {
-            $p =& self::$prepared;
+        public static function page($num = 1, $count = 50, $sorts = 'pkeys') {
+            $class = get_called_class();
 
-            if (($name && !array_key_exists($name, $p)) || !$name) {
-                if ($name)
-                    $p[$name] = true;
-                else
-                    $name = '';
+            $table = self::table($class);
+            $cols  = self::column_names($class);
+            $pkeys = self::primary_keys($class);
+            $order = Array();
 
-                error_log("Preparing query ($name): $str");
-                pg_prepare(DB(), $name, $str);
+            if ($sorts == 'pkeys') {
+                $pkeys = self::primary_keys($class);
+                $name  = "_page_{$table}_pkeys";
+
+                foreach ($pkeys as $pkey)
+                    array_push($order, "$pkey ASC");
+            } else {
+                $idx = Array();
+
+                foreach ($sorts as $sort) {
+                    if (preg_match('/^(.*)\s*(ASC|DESC)$/i', $sort, $matches)) {
+                        $sort  = $matches[1];
+                        $order = strtoupper($matches[2]);
+                    }
+                    else
+                        $order = 'ASC';
+
+                    $index = array_search($sort, $cols);
+                    if ($index === FALSE)
+                        trigger_error("$sort is not a valid sort column",
+                                      E_USER_ERROR);
+
+                    array_push($idx, $index);
+                    array_push($order, "$sort $order");
+                }
+
+                $name = "_page_{$table}_" . join($idx, ',');
             }
 
-            return pg_execute(DB(), $name, $params);
-        }
+            if (Database::prepared($name))
+                $query = '';
+            else {
+                $cols  = join(', ', $cols);
+                $ords  = join(', ', $order);
 
-        /* public Model->prefetch(String, [Array], [String])
-         * returns Array
-         *
-         * Runs a given query under the same rules as Model->query() (see
-         * above). This function, however, pre-processes the results rather than
-         * returning the statement Result for processing. This may not always be
-         * desired for large resultsets, but for small datasets or just datasets
-         * where you always want to do something with all the rows, it may be
-         * more desirable.
-         */
-        public function prefetch($str, $params = Array(), $name = NULL) {
-            $ret = Array();
-            $r = $this->query($str, $params, $name);
+                $query = "SELECT $cols FROM $table ORDER BY $ords " .
+                         'LIMIT $1 OFFSET $2';
+            }
 
-            while ($row = pg_fetch_assoc($r))
-                $ret[] = $row;
+            $offset = ($num - 1) * $count;
 
-            return $ret;
-        }
+            $return = Array();
+            $result = Database::prefetch($query, Array($count, $offset), $name);
 
-        /* public Model->prefetch_int(String, [Array], [String])
-         * returns Array
-         *
-         * Runs a query and returns the resultset like Model->prefetch() (see
-         * above). This function, however, does not return an Array of
-         * associative arrays (hashes), but just an array of regular integer-
-         * indexed arrays. This will be faster for large resultsets where the
-         * columns are not specified in the query (SELECT *). However, these
-         * types of queries should be rare.
-         */
-        public function prefetch_int($str, $params = Array(), $name = NULL) {
-            $ret = Array(); 
-            $r = $this->query($str, $params, $name);
+            foreach ($result as $row) {
+                $obj = new $class();
+                $obj->_set_all($row);
 
-            while ($row = pg_fetch_row($r))
-                $ret[] = $row;
+                array_push($return, $obj);
+            }
 
-            return $ret;
+            return $return;
         }
 
         /* public Model->load(Integer)
@@ -152,9 +151,9 @@ COLQUERY;
         public function load($id) {
             $table = $this->table();
             $query = "SELECT * FROM $table WHERE id = $1";
-            $name  = '_load_' . ((string) get_class($this));
+            $name  = "_load_$table";
 
-            $data = $this->prefetch($query, Array($id), $name);
+            $data = Database::prefetch($query, Array($id), $name);
             $this->_set_all($data[0]);
 
             return $this;
@@ -218,7 +217,9 @@ COLQUERY;
                 return $this;
 
             foreach ($this->primary_keys() as $name) {
-                $col = $this->columns[$name];
+                $cols = $this->columns();
+
+                $col = $cols[$name];
                 $val = $col->prep_for_database($this->column($name));
 
                 array_push($where, "($name = \$$x)");
@@ -233,8 +234,7 @@ COLQUERY;
             $name  = "_update_{$table}_$colx";
 
             $query   = "UPDATE $table SET $sets WHERE $where RETURNING $rets";
-echo "<pre>\n$query</pre>\n";
-            $results = $this->prefetch($query, $vals, $name);
+            $results = Database::prefetch($query, $vals, $name);
 
             $this->_set_all($results[0]);
             return $this;
@@ -273,7 +273,7 @@ echo "<pre>\n$query</pre>\n";
              $query = "INSERT INTO $table ($names) VALUES ($holds) " .
                       "RETURNING $rets";
 
-             $results = $this->prefetch($query, $vals, "_insert_$table");
+             $results = Database::prefetch($query, $vals, "_insert_$table");
              $this->_set_all($results[0]);
 
              return $this;
@@ -286,17 +286,18 @@ echo "<pre>\n$query</pre>\n";
          * current values first.
          */
         protected function _set_all($hash) {
+            $cols = $this->columns();
             $this->_clear();
 
             foreach ($hash as $key => $value) {
-                if (!array_key_exists($key, $this->columns)) {
+                if (!array_key_exists($key, $cols)) {
                     $table = $this->table();
                     trigger_error("Unknown column $key for $table",
                                   E_USER_ERROR);
                     continue;
                 }
 
-                $col = $this->columns[$key];
+                $col = $cols[$key];
                 $val = $col->process_value($value);
 
                 $this->clean[$key] = $val;
@@ -316,7 +317,7 @@ echo "<pre>\n$query</pre>\n";
             $this->clean = Array();
             $this->dirty = Array();
 
-            foreach ($this->columns as $key => $col) {
+            foreach ($this->columns() as $key => $col) {
                 $this->clean[$key] = NULL;
                 $this->dirty[$key] = NULL;
             }
@@ -324,31 +325,80 @@ echo "<pre>\n$query</pre>\n";
             return $this;
         }
 
-        /* public Model->columns()
+        /* public Model->cols()
+         * returns Array
+         *
+         * Caches the static call to Model::columns() (which is expensive).
+         */
+        public function cols() {
+            if ($this->cols)
+                return $this->cols;
+
+            $this->cols = $this->columns((string) get_class($this));
+            return $this->cols;
+        }
+
+        /* public Model::columns([String])
          * returns Array
          *
          * Returns an array of the Column objects for a given model.
          */
-        public function columns() {
-            return $this->columns;
+        public static function columns($class = NULL) {
+            if (!$class)
+                $class = get_called_class();
+
+            if (!array_key_exists($class, self::$columns)) {
+                $table = self::table($class);
+                $ary   = self::_colquery($table);
+
+                self::$columns[$class] = Array();
+                $columns =& self::$columns[$class];
+
+                foreach ($ary as $x => $row) {
+                    $name = $row['name'];
+                    $type = $row['db_type'];
+                    $null = $row['allow_null'];
+                    $pkey = $row['primary_key'];
+
+                    $null = $null == 't' ? TRUE : FALSE;
+                    $pkey = $pkey == 't' ? TRUE : FALSE;
+
+                    $columns[$name] = new Column($name, $type, $null, $pkey);
+                }
+            }
+
+            return self::$columns[$class];
         }
 
-        /* public Model->column_names()
+        /* public Model::column_names([String])
          * returns Array
          *
          * Returns a sorted array of all column names for a given model.
          */
-        public function column_names() {
-            $keys = array_keys($this->columns);
+        public function column_names($class = NULL) {
+            if (!$class)
+                $class = get_called_class();
+
+            $keys = array_keys(self::columns($class));
             sort($keys);
 
             return $keys;
         }
 
-        public function primary_keys() {
+        /* public Model::primary_keys([String])
+         * returns Array
+         *
+         * Returns a list of columns which constitute the primary key of this
+         * table. This will usually be one-element arrays, ie "['id']", but it
+         * allows us to support more complex operations.
+         */
+        public static function primary_keys($class = NULL) {
+            if (!$class)
+                $class = get_called_class();
+
             $pkeys = Array();
 
-            foreach ($this->columns AS $name => $col)
+            foreach (self::columns($class) AS $name => $col)
                 if ($col->primary_key())
                     array_push($pkeys, $name);
 
@@ -363,7 +413,7 @@ echo "<pre>\n$query</pre>\n";
          * the database). If there's no such column, NULL is returned.
          */
         public function column($name) {
-            if (!array_key_exists($name, $this->columns))
+            if (!array_key_exists($name, $this->cols()))
                 return;
 
             return $this->dirty[$name];
@@ -376,10 +426,12 @@ echo "<pre>\n$query</pre>\n";
          * currently in the model.
          */
         public function form($name, $comparison = NULL, $echo = TRUE) {
-            if (!array_key_exists($name, $this->columns))
+            $cols = $this->cols();
+
+            if (!array_key_exists($name, $cols))
                 return;
 
-            $col = $this->columns[$name];
+            $col = $cols[$name];
             $val = $col->formify($this->column($name), $comparison);
 
             if ($echo)
@@ -393,10 +445,12 @@ echo "<pre>\n$query</pre>\n";
          * Returns a sanitized-for-HTML version of the value of a column.
          */
         public function display($name) {
-            if (!array_key_exists($name, $this->columns))
+            $cols = $this->cols();
+
+            if (!array_key_exists($name, $cols))
                 return;
 
-            $col = $this->columns[$name];
+            $col = $cols[$name];
             return $col->stringify($this->column($name));
         }
 
@@ -410,10 +464,12 @@ echo "<pre>\n$query</pre>\n";
          * a Date object).
          */
         public function set_column($name, $value) {
-            if (!array_key_exists($name, $this->columns))
+            $cols = $this->cols();
+
+            if (!array_key_exists($name, $cols))
                 return;
 
-            $col   = $this->columns[$name];
+            $col   = $cols[$name];
             $value = $col->process_value($value);
             $this->dirty[$name] = $value;
 
@@ -429,11 +485,11 @@ echo "<pre>\n$query</pre>\n";
          * process.
          */
         public function __call($name, $args) {
-            if (array_key_exists($name, $this->columns))
+            if (array_key_exists($name, $this->cols()))
                 return $this->column($name);
 
             if (preg_match('/^set_([a-z0-9_]+)$/i', $name, $matches))
-                if (array_key_exists($matches[1], $this->columns))
+                if (array_key_exists($matches[1], $this->cols()))
                     return $this->set_column($matches[1], $args[0]);
 
             $class = ((string) get_class($this));
@@ -441,14 +497,22 @@ echo "<pre>\n$query</pre>\n";
                           E_USER_ERROR);
         }
 
-        /* public (abstract) Model->table()
+        /* public (abstract) Model::table([String])
          * returns String
          *
-         * A method which must be defined in all child classes, which contains
-         * the name of the table associated with the class. It is used for
-         * automatically generating queries.
+         * Returns the table name for a given class. It must have been
+         * previously registered with Model::associate_table().
          */
-        public abstract function table();
+        public static function table($class = NULL) {
+            if (!$class)
+                $class = get_called_class();
+
+            if (array_key_exists($class, self::$tbl_lookup))
+                return self::$tbl_lookup[$class];
+            else
+                trigger_error("Table for $class is not defined",
+                              E_USER_ERROR);
+        }
     }
 
 ?>
