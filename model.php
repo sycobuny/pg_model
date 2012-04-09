@@ -73,6 +73,7 @@ COLQUERY;
             else
                 $str = '';
 
+            $str = preg_replace('/(\n|\s)+/m', ' ', $str);
             return $this->prefetch($str, Array($this->table()), '_colquery');
         }
 
