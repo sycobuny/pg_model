@@ -9,6 +9,12 @@
         private static $tbl_lookup = Array();
         private static $cls_lookup = Array();
 
+        private static $associations = Array();
+        private static $one_to_many  = Array();
+        private static $many_to_many = Array();
+        private static $many_to_one  = Array();
+
+        private $assoc;
         private $cols;
         private $clean;
         private $dirty;
@@ -20,6 +26,8 @@
          * are set to NULL to prevent any "undefined key" errors.
          */
         function __construct() {
+            $this->assoc = Array();
+
             $this->cols(); // get the value and discard the result
             $this->_clear();
         }
@@ -33,6 +41,55 @@
         public static function associate_table($table, $class) {
             self::$tbl_lookup[$class] = $table;
             self::$cls_lookup[$table] = $class;
+
+            return NULL;
+        }
+
+        /* public Model::one_to_many(String, String, String)
+         * returns NULL
+         *
+         * Links a Model to another Model, where the first named Model has many
+         * rows for one row in the second named Model. For the inverse
+         * relationship, see Model::many_to_one. The middle parameter is used to
+         * declare a name for the relationship, which must be unique among all
+         * associations for the second named Model.
+         */
+        public static function one_to_many($model, $name, $class) {
+            self::$one_to_many[$class][$name] = $model;
+            self::$associations[$class][$name] = 'otm';
+
+            return NULL;
+        }
+
+        /* public Model::many_to_many(String, String, String)
+         * returns NULL
+         *
+         * Links a Model to another Model, where each Model has many rows for
+         * each row in the other Model, linked through a join table. By
+         * convention, the join table is expected to be the two table names,
+         * alphabetically sorted and joined by '_'. The middle parameter is used
+         * to declare a name for the relationship, which must be unique among
+         * all associations for the second named Model.
+         */
+        public static function many_to_many($model, $name, $class) {
+            self::$many_to_many[$class][$name] = $model;
+            self::$associations[$class][$name] = 'mtm';
+
+            return NULL;
+        }
+
+        /* public Model::many_to_one(String, String, String)
+         * returns NULL
+         *
+         * Links a Model to another Model, where the first named Model has one
+         * row for many in the second named Model. For the inverse relationship,
+         * see Model::one_to_many(). The middle parameter is used to declare a
+         * name for the relationship, which must be unique among all
+         * associations for the second named Model.
+         */
+        public static function many_to_one($model, $name, $class) {
+            self::$many_to_one[$class][$name] = $model;
+            self::$associations[$class][$name] = 'mto';
 
             return NULL;
         }
@@ -70,6 +127,81 @@ COLQUERY;
 
             $str = preg_replace('/(\n|\s)+/m', ' ', $str);
             return Database::prefetch($str, Array($table), '_colquery');
+        }
+
+        /* private _load_association(String, [Boolean])
+         * returns Array
+         *
+         * Loads an association based on a preset specification given with
+         * one of Model::one_to_many(), Model::many_to_many, or
+         * Model::many_to_one(). Returns a cached version if it's already been
+         * loaded unless force is set to TRUE.
+         */
+        private function _load_association($name, $force = FALSE) {
+            if (array_key_exists($name, $this->assoc) && !$force)
+                return $this->assoc[$name];
+
+            $myclass = (string) get_class($this);
+            $mytable = self::$tbl_lookup[$myclass];
+            $myid    = preg_replace('/s$/', '_id', $mytable);
+
+            $type   = self::$associations[$myclass][$name];
+            $qname  = "_assoc_{$mytable}_{$name}";
+            $params = Array($this->id());
+
+            switch ($type) {
+                case 'otm':
+                    $class = self::$one_to_many[$myclass][$name];
+                    $table = self::$tbl_lookup[$class];
+
+                    $query = "SELECT * FROM $table WHERE $myid = \$1";
+                    $rows  = Database::prefetch($query, $params, $qname);
+
+                    $return = Array();
+                    foreach ($rows as $row) {
+                        $obj = new $class();
+                        $obj->_set_all($row);
+                        array_push($return, $obj);
+                    }
+
+                    $this->assoc[$name] =& $return;
+                    return $return;
+                case 'mtm':
+                    $class  = self::$many_to_many[$name];
+                    $table  = self::$tbl_lookup[$class];
+                    $tblary = Array($table, $mytable);
+
+                    sort($tblary);
+                    $jtable = join('_', $tblary);
+                    $id     = preg_replace('/s$/', '_id', $table);
+
+                    $query = "SELECT $table.* FROM $table INNER JOIN $jtable " .
+                             "ON $jtable.$id = $table.id WHERE $jtable.$myid " .
+                             '= $1';
+                    $rows  = Database::prefetch($query, $params, $qname);
+
+                    $return = Array();
+                    foreach ($rows as $row) {
+                        $obj = new $class;
+                        $this->_set_all($row);
+
+                        array_push($return, $obj);
+                    }
+
+                    $this->assoc[$name] =& $return;
+                    return $return;
+                case 'mto':
+                    $class = self::$many_to_one[$myclass][$name];
+                    $table = self::$tbl_lookup[$class];
+
+                    $query = "SELECT * FROM $table WHERE $myid = \$1";
+                    $rows  = Database::prefetch($query, $params, $qname);
+                    $obj   = new $class();
+                    $obj->_set_all($rows[0]);
+
+                    $this->assoc[$name] =& $obj;
+                    return $obj;
+            }
         }
 
         /* public Model::page([Integer], [Integer])
@@ -371,6 +503,21 @@ COLQUERY;
             return self::$columns[$class];
         }
 
+        /* public Model::sort(Model, Model)
+         * returns Integer
+         *
+         * A sorting function for a default sort of an array of Model objects,
+         * suitable for passing to usort().
+         */
+        public static function sort($a, $b) {
+            $aid = $a->id();
+            $bid = $b->id();
+            if ($aid == $bid)
+                return 0;
+
+            return ($aid > $bid) ? 1 : -1;
+        }
+
         /* public Model::column_names([String])
          * returns Array
          *
@@ -489,9 +636,17 @@ COLQUERY;
             if (array_key_exists($name, $this->cols()))
                 return $this->column($name);
 
-            if (preg_match('/^set_([a-z0-9_]+)$/i', $name, $matches))
+            if (preg_match('/^set_([a-zA-Z0-9_]+)$/', $name, $matches))
                 if (array_key_exists($matches[1], $this->cols()))
                     return $this->set_column($matches[1], $args[0]);
+
+            if (preg_match('/^load_([a-zA-Z0-9_]+)$/', $name, $matches)) {
+                $assoc = self::$associations[(string) get_class($this)];
+                if (array_key_exists($matches[1], $assoc)) {
+                    $force = count($args) ? ((boolean) $args[0]) : FALSE;
+                    return $this->_load_association($matches[1], $force);
+                }
+            }
 
             $class = ((string) get_class($this));
             trigger_error("Method $class::$name does not exist",
