@@ -86,8 +86,12 @@
             if ($value === NULL)
                 return '';
 
-            if (($comparison !== NULL) && ($value == $comparison))
-                return ' checked';
+            if ($comparison !== NULL)
+                if ($value == $comparison)
+                    return ' checked';
+                else
+                    return '';
+
 
             switch ($this->datatype) {
                 case 'boolean':
