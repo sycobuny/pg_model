@@ -19,6 +19,10 @@
              $frame   = count($btrace) - 1;
              $matches = array();
 
+             foreach ($btrace as $f)
+                 if (array_key_exists('object', $f) && $f['object'])
+                     return (string) get_class($f['object']);
+
              while (empty($matches) && ($frame > -1)) {
                  $lines  = file($btrace[$frame]['file']);
                  $caller = $lines[ $btrace[$frame]['line'] - 1 ];
