@@ -246,38 +246,39 @@ COLQUERY;
          * Runs an INSERT query against the database, based on the current
          * contents of the "dirty" array.
          */
-         protected function _insert() {
-             $table = $this->table();
-             $cols  = $this->columns();
+        protected function _insert() {
+            $table = $this->table();
+            $cols  = $this->columns();
 
-             $names = Array();
-             $holds = Array();
-             $vals  = Array();
-             $rets  = Array();
+            $names = Array();
+            $holds = Array();
+            $vals  = Array();
+            $rets  = Array();
 
-             $x = 1;
-             foreach ($cols as $name => $col) {
-                 array_push($rets, $name);
+            $x = 1;
+            foreach ($cols as $name => $col) {
+                array_push($rets, $name);
 
-                 if ($col->primary_key()) continue;
-                 $val = $col->prep_for_database($this->column($name));
+                if ($col->primary_key()) continue;
+                $val = $col->prep_for_database($this->column($name));
 
-                 array_push($names, $name);
-                 array_push($holds, '$' . $x++);
-                 array_push($vals,  $val);
-             }
+                array_push($names, $name);
+                array_push($holds, '$' . $x++);
+                array_push($vals,  $val);
+            }
 
-             $names = join(', ', $names);
-             $holds = join(', ', $holds);
+            $names = join(', ', $names);
+            $holds = join(', ', $holds);
 
-             $query = "INSERT INTO $table ($names) VALUES ($holds) " .
-                      "RETURNING $rets";
+            $query = "INSERT INTO $table ($names) VALUES ($holds) " .
+                     "RETURNING $rets";
 
-             $results = Database::prefetch($query, $vals, "_insert_$table");
-             $this->_set_all($results[0]);
+            $results = Database::prefetch($query, $vals, "_insert_$table");
+            $this->_set_all($results[0]);
 
-             return $this;
-         }
+            return $this;
+        }
+
 
         /* protected Model->_set_all(Array)
          * returns $this
