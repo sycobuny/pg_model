@@ -411,12 +411,52 @@ COLQUERY;
             return $this;
         }
 
+        /* public Model->set_all(Array)
+         * returns $this
+         *
+         * Sets all of the Model-controlled columns at once, clearing their
+         * current values first. This assumes the values have come from an
+         * HTML form or similar, and only sets the dirty array. To set both the
+         * clean and the dirty array, see Model->_set_all().
+         */
+        public function set_all($hash) {
+            $check_re = '/^_check_([a-zA-Z0-9_]+)$/';
+            $cols     = $this->columns();
+
+            foreach ($hash as $key => $value) {
+                /* if there's a value _check_some_col that we come across, then
+                 * reset the $key. this can be used to fill a value in case
+                 * the HTML form doesn't send checkboxes (which is the case in
+                 * most browsers). Since it's not always going to need to be
+                 * used, we'll skip it if there actually *was* a value supplied.
+                 */
+                if (preg_match($check_re, $key, $matches)) {
+                    $key = $matches[1];
+                    if (array_key_exists($key, $hash))
+                        continue;
+                }
+
+                if (!array_key_exists($key, $cols)) {
+                    $table = $this->table();
+                    trigger_error("Unknown column $key for $table",
+                                  E_USER_ERROR);
+                    continue;
+                }
+
+                $col = $cols[$key];
+                $this->dirty[$key] = $cols[$key]->process_value($value);
+            }
+
+            return $this;
+        }
 
         /* protected Model->_set_all(Array)
          * returns $this
          *
          * Sets all of the Model-controlled columns at once, clearing their
-         * current values first.
+         * current values first. This assumes the values have come from the
+         * database, and sets the clean array as well as the dirty array. To
+         * only set the dirty array, see Model->set_all().
          */
         protected function _set_all($hash) {
             $cols = $this->columns();
@@ -469,6 +509,19 @@ COLQUERY;
 
             $this->cols = $this->columns((string) get_class($this));
             return $this->cols;
+        }
+
+        /* public Model->column_inspect(String)
+         * returns Column
+         *
+         * Returns the Column named, for use in external functions which may
+         * need to query certain information such as the datatype of a column.
+         * It is purely syntactic sugar, as the data is still accessible without
+         * this method.
+         */
+        public function column_inspect($column) {
+            $cols = $this->cols();
+            return $cols[$column];
         }
 
         /* public Model::columns([String])
