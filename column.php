@@ -130,35 +130,33 @@
          * inclusion in an object, depending on the datatype of the column.
          */
         public function process_value($value) {
+            if (($value === '') || ($value === NULL))
+                return NULL;
+
             switch ($this->datatype) {
                 case 'boolean':
-                    if ($value === 'f' || $value === 0 || $value === false ||
-                        $value === 'false' || !$value) {
+                    if ($value === 'NULL')
+                        return NULL;
+                    else if ($value === 'f' || $value === 0 ||
+                             $value === false || $value === 'false' || !$value)
                         return FALSE;
-                    }
-                    else {
+                    else
                         return TRUE;
-                    }
                 case 'double precision':
                 case 'numeric':
                     return (double) $value;
                 case 'integer':
                     return (integer) $value;
-                case 'text':
-                case 'character varying':
-                    return $value;
                 case 'date':
                     if (is_object($value) &&
                         ((string) get_class($value)) == 'Date')
                         return $value;
                     return Date::parse($value);
-                case 'timestamp with time zone':
-                case 'timestamp without time zone':
-                    return $value;
-                case 'interval':
-                    return $value;
                 default:
-                    return $value;
+                    if ($value == '')
+                        return NULL;
+                    else
+                        return $value;
             }
         }
     }
