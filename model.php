@@ -133,7 +133,7 @@ COLQUERY;
          * returns Array
          *
          * Loads an association based on a preset specification given with
-         * one of Model::one_to_many(), Model::many_to_many, or
+         * one of Model::one_to_many(), Model::many_to_many(), or
          * Model::many_to_one(). Returns a cached version if it's already been
          * loaded unless force is set to TRUE.
          */
@@ -191,10 +191,12 @@ COLQUERY;
                     $this->assoc[$name] =& $return;
                     return $return;
                 case 'mto':
-                    $class = self::$many_to_one[$myclass][$name];
-                    $table = self::$tbl_lookup[$class];
+                    $class  = self::$many_to_one[$myclass][$name];
+                    $table  = self::$tbl_lookup[$class];
+                    $id     = preg_replace('/s$/', '_id', $table);
+                    $params = Array($this->column($id));
 
-                    $query = "SELECT * FROM $table WHERE $myid = \$1";
+                    $query = "SELECT * FROM $table WHERE id = \$1";
                     $rows  = Database::prefetch($query, $params, $qname);
                     $obj   = new $class();
                     $obj->_set_all($rows[0]);
