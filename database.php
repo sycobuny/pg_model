@@ -84,6 +84,11 @@
             $ret = Array();
             $r = Database::query($str, $params, $name);
 
+            if ($r === FALSE) {
+                trigger_error("Query $str could not be executed: " .
+                              pg_last_error(), E_USER_ERROR);
+            }
+
             while ($row = pg_fetch_assoc($r))
                 $ret[] = $row;
 
