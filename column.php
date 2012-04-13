@@ -1,6 +1,6 @@
 <?php
 
-    include('date.php');
+    include_once('date.php');
 
     class Column {
         private $name;

@@ -1,8 +1,8 @@
 <?php
 
-    include('lib.php');
-    include('database.php');
-    include('column.php');
+    include_once('lib.php');
+    include_once('database.php');
+    include_once('column.php');
 
     abstract class Model {
         private static $columns    = Array();
