@@ -401,6 +401,7 @@ COLQUERY;
 
             $names = join(', ', $names);
             $holds = join(', ', $holds);
+            $rets  = join(', ', $rets);
 
             $query = "INSERT INTO $table ($names) VALUES ($holds) " .
                      "RETURNING $rets";
