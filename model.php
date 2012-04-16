@@ -5,14 +5,14 @@
     include_once('column.php');
 
     abstract class Model {
-        private static $columns    = Array();
-        private static $tbl_lookup = Array();
-        private static $cls_lookup = Array();
+        private static $columns    = array();
+        private static $tbl_lookup = array();
+        private static $cls_lookup = array();
 
-        private static $associations = Array();
-        private static $one_to_many  = Array();
-        private static $many_to_many = Array();
-        private static $many_to_one  = Array();
+        private static $associations = array();
+        private static $one_to_many  = array();
+        private static $many_to_many = array();
+        private static $many_to_one  = array();
 
         private $assoc;
         private $cols;
@@ -26,7 +26,7 @@
          * are set to NULL to prevent any "undefined key" errors.
          */
         function __construct() {
-            $this->assoc = Array();
+            $this->assoc = array();
 
             $this->cols(); // get the value and discard the result
             $this->_clear();
@@ -126,7 +126,7 @@ COLQUERY;
                 $str = '';
 
             $str = preg_replace('/(\n|\s)+/m', ' ', $str);
-            return Database::prefetch($str, Array($table), '_colquery');
+            return Database::prefetch($str, array($table), '_colquery');
         }
 
         /* private _load_association(String, [Boolean])
@@ -147,7 +147,7 @@ COLQUERY;
 
             $type   = self::$associations[$myclass][$name];
             $qname  = "_assoc_{$mytable}_{$name}";
-            $params = Array($this->id());
+            $params = array($this->id());
 
             switch ($type) {
                 case 'otm':
@@ -157,7 +157,7 @@ COLQUERY;
                     $query = "SELECT * FROM $table WHERE $myid = \$1";
                     $rows  = Database::prefetch($query, $params, $qname);
 
-                    $return = Array();
+                    $return = array();
                     foreach ($rows as $row) {
                         $obj = new $class();
                         $obj->_set_all($row);
@@ -169,7 +169,7 @@ COLQUERY;
                 case 'mtm':
                     $class  = self::$many_to_many[$name];
                     $table  = self::$tbl_lookup[$class];
-                    $tblary = Array($table, $mytable);
+                    $tblary = array($table, $mytable);
 
                     sort($tblary);
                     $jtable = join('_', $tblary);
@@ -180,7 +180,7 @@ COLQUERY;
                              '= $1';
                     $rows  = Database::prefetch($query, $params, $qname);
 
-                    $return = Array();
+                    $return = array();
                     foreach ($rows as $row) {
                         $obj = new $class;
                         $this->_set_all($row);
@@ -194,7 +194,7 @@ COLQUERY;
                     $class  = self::$many_to_one[$myclass][$name];
                     $table  = self::$tbl_lookup[$class];
                     $id     = preg_replace('/s$/', '_id', $table);
-                    $params = Array($this->column($id));
+                    $params = array($this->column($id));
 
                     $query = "SELECT * FROM $table WHERE id = \$1";
                     $rows  = Database::prefetch($query, $params, $qname);
@@ -219,7 +219,7 @@ COLQUERY;
             $table = self::table($class);
             $cols  = self::column_names($class);
             $pkeys = self::primary_keys($class);
-            $order = Array();
+            $order = array();
 
             if ($sorts == 'pkeys') {
                 $pkeys = self::primary_keys($class);
@@ -228,7 +228,7 @@ COLQUERY;
                 foreach ($pkeys as $pkey)
                     array_push($order, "$pkey ASC");
             } else {
-                $idx = Array();
+                $idx = array();
 
                 foreach ($sorts as $sort) {
                     if (preg_match('/^(.*)\s*(ASC|DESC)$/i', $sort, $matches)) {
@@ -262,8 +262,8 @@ COLQUERY;
 
             $offset = ($num - 1) * $count;
 
-            $return = Array();
-            $result = Database::prefetch($query, Array($count, $offset), $name);
+            $return = array();
+            $result = Database::prefetch($query, array($count, $offset), $name);
 
             foreach ($result as $row) {
                 $obj = new $class();
@@ -287,7 +287,7 @@ COLQUERY;
             $query = "SELECT * FROM $table WHERE id = $1";
             $name  = "_load_$table";
 
-            $data = Database::prefetch($query, Array($id), $name);
+            $data = Database::prefetch($query, array($id), $name);
             $this->_set_all($data[0]);
 
             return $this;
@@ -324,11 +324,11 @@ COLQUERY;
             $table = $this->table();
             $cols  = $this->columns();
 
-            $sets  = Array();
-            $colx  = Array();
-            $vals  = Array();
-            $rets  = Array();
-            $where = Array();
+            $sets  = array();
+            $colx  = array();
+            $vals  = array();
+            $rets  = array();
+            $where = array();
 
             $x = 1;
             $y = 1;
@@ -384,10 +384,10 @@ COLQUERY;
             $table = $this->table();
             $cols  = $this->columns();
 
-            $names = Array();
-            $holds = Array();
-            $vals  = Array();
-            $rets  = Array();
+            $names = array();
+            $holds = array();
+            $vals  = array();
+            $rets  = array();
 
             $x = 1;
             foreach ($cols as $name => $col) {
@@ -490,8 +490,8 @@ COLQUERY;
          * and any modifications therein).
          */
         protected function _clear() {
-            $this->clean = Array();
-            $this->dirty = Array();
+            $this->clean = array();
+            $this->dirty = array();
 
             foreach ($this->columns() as $key => $col) {
                 $this->clean[$key] = NULL;
@@ -540,7 +540,7 @@ COLQUERY;
                 $table = self::table($class);
                 $ary   = self::_colquery($table);
 
-                self::$columns[$class] = Array();
+                self::$columns[$class] = array();
                 $columns =& self::$columns[$class];
 
                 foreach ($ary as $x => $row) {
@@ -600,7 +600,7 @@ COLQUERY;
             if (!$class)
                 $class = get_called_class();
 
-            $pkeys = Array();
+            $pkeys = array();
 
             foreach (self::columns($class) AS $name => $col)
                 if ($col->primary_key())

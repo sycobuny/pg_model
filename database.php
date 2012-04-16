@@ -2,7 +2,7 @@
 
     class Database {
         private static $connection;
-        private static $prepared = Array();
+        private static $prepared = array();
 
         /* public Database::connect([Array])
          * returns Resource
@@ -21,7 +21,7 @@
             if (self::$connection)
                 return self::$connection;
 
-            $connect_ary = Array();
+            $connect_ary = array();
             foreach ($params as $key => $value) {
                 $value = preg_replace('/( |\\\\)/', '\\\\\1', $value);
 
@@ -54,7 +54,7 @@
          * Note that this means the query string is disregarded in future calls
          * which involve the same prepared statement name.
          */
-        public static function query($str, $params = Array(), $name = NULL) {
+        public static function query($str, $params = array(), $name = NULL) {
             $p =& self::$prepared;
 
             if (($name && !array_key_exists($name, $p)) || !$name) {
@@ -80,8 +80,8 @@
          * where you always want to do something with all the rows, it may be
          * more desirable.
          */
-        public static function prefetch($str, $params = Array(), $name = NULL) {
-            $ret = Array();
+        public static function prefetch($str, $params = array(), $name = NULL) {
+            $ret = array();
             $r = Database::query($str, $params, $name);
 
             if ($r === FALSE) {
@@ -105,9 +105,9 @@
          * columns are not specified in the query (SELECT *). However, these
          * types of queries should be rare.
          */
-        public static function prefetch_int($str, $params = Array(),
+        public static function prefetch_int($str, $params = array(),
                                             $name = NULL) {
-            $ret = Array();
+            $ret = array();
             $r = Database::query($str, $params, $name);
 
             while ($row = pg_fetch_row($r))
