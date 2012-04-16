@@ -2,7 +2,7 @@ Where Do We Go From Here?
 =========================
 
 So, you think PGModel sounds cool? To that I have to say first, "what is wrong
-with you?" Then, I follow it up quickly be "er, I mean, welcome aboard!"
+with you?" Then, I follow it up quickly by "er, I mean, welcome aboard!"
 
 There's lots to do to make this actually useful. Feel free to tackle anything
 here, or maybe just add a feature here I missed. I'll try to sync it up with the
