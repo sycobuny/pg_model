@@ -96,7 +96,6 @@
 
         /**
          * Create a many-to-one relationship with another Model
-         *  public Model::many_to_one(String, String, String)
          *
          * Links a Model to another Model, where the first named Model has one
          * row for many in the second named Model. For the inverse relationship,
