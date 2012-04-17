@@ -1,6 +1,7 @@
 <?php
 
-    include_once('date.php');
+    include_once(join(DIRECTORY_SEPARATOR,
+                      array(dirname(__FILE__), 'date.php')));
 
     class Column {
         private $name;

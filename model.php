@@ -1,8 +1,10 @@
 <?php
 
-    include_once('lib.php');
-    include_once('database.php');
-    include_once('column.php');
+    foreach (array('lib', 'database', 'column') as $fn) {
+        $fn = join(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "$fn.php"));
+        include_once($fn);
+    }
+    unset($fn);
 
     abstract class Model {
         private static $columns    = array();
