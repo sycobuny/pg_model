@@ -43,7 +43,7 @@
 
              // stop notices for undefined indexes
              if (!isset($matches[1]))
-                 $matches[1] = NULL;
+                 $matches[1] = null;
 
              // we've got an object trying to call a static method, so it's at
              // least one layer out.

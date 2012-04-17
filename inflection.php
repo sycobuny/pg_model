@@ -130,7 +130,7 @@
                 }
             }
 
-            return NULL;
+            return null;
         }
 
         /* public Inflection::pluralize(String)
@@ -160,7 +160,7 @@
             }
 
             // handle irregular pluralization
-            $ret = NULL;
+            $ret = null;
             if (preg_match('/(^|_)([^_]+)f(e?)$/', $str, $m)) {
                 if ($m[3]) {
                     $ret = self::_suf($str, $m[2], self::$fe_ves, 'fe', 'ves');
@@ -189,7 +189,7 @@
             }
 
             // this means we got an irregular pluralized result
-            if ($ret !== NULL)
+            if ($ret !== null)
                 return $ret;
 
             // by this point, we've tried all non-standard approaches. just do
@@ -222,7 +222,7 @@
                 if (in_array($m[2], self::$uncountable)) {
                     return $str;
                 }
-                else if (($idx = array_search($m[2], self::$irreg)) !== FALSE) {
+                else if (($idx = array_search($m[2], self::$irreg)) !== false) {
                     return $m[1] . $idx;
                 }
                 else {
@@ -236,10 +236,10 @@
             }
 
             // handle other irregular rule-based singularization
-            $ret = NULL;
+            $ret = null;
             if (preg_match('/(^|_)([^_]+)ves$/', $str, $m)) {
                 $ret = self::_suf($str, $m[2], self::$fe_ves, 'ves', 'fe');
-                if ($ret !== NULL)
+                if ($ret !== null)
                     return $ret;
 
                 $ret = self::_suf($str, $m[2], self::$f_ves, 'ves', 'f');
@@ -255,7 +255,7 @@
             }
             else if (preg_match('/(^|_)([^_]+)a$/', $str, $m)) {
                 $ret = self::_suf($str, $m[2], self::$um_a, 'a', 'um');
-                if ($ret !== NULL)
+                if ($ret !== null)
                     return $ret;
 
                 $ret = self::_suf($str, $m[2], self::$on_a, 'a', 'on');
@@ -265,7 +265,7 @@
             }
 
             // we got a rule-based irregularity
-            if ($ret !== NULL)
+            if ($ret !== null)
                 return $ret;
 
             // otherwise try standard English rules to decode it.

@@ -44,7 +44,7 @@
             self::$tbl_lookup[$class] = $table;
             self::$cls_lookup[$table] = $class;
 
-            return NULL;
+            return null;
         }
 
         /* public Model::one_to_many(String, String, String)
@@ -60,7 +60,7 @@
             self::$one_to_many[$class][$name] = $model;
             self::$associations[$class][$name] = 'otm';
 
-            return NULL;
+            return null;
         }
 
         /* public Model::many_to_many(String, String, String)
@@ -77,7 +77,7 @@
             self::$many_to_many[$class][$name] = $model;
             self::$associations[$class][$name] = 'mtm';
 
-            return NULL;
+            return null;
         }
 
         /* public Model::many_to_one(String, String, String)
@@ -93,7 +93,7 @@
             self::$many_to_one[$class][$name] = $model;
             self::$associations[$class][$name] = 'mto';
 
-            return NULL;
+            return null;
         }
 
         /* private Model::_colquery()
@@ -139,7 +139,7 @@ COLQUERY;
          * Model::many_to_one(). Returns a cached version if it's already been
          * loaded unless force is set to TRUE.
          */
-        private function _load_association($name, $force = FALSE) {
+        private function _load_association($name, $force = false) {
             if (array_key_exists($name, $this->assoc) && !$force)
                 return $this->assoc[$name];
 
@@ -241,7 +241,7 @@ COLQUERY;
                         $order = 'ASC';
 
                     $index = array_search($sort, $cols);
-                    if ($index === FALSE)
+                    if ($index === false)
                         trigger_error("$sort is not a valid sort column",
                                       E_USER_ERROR);
 
@@ -496,8 +496,8 @@ COLQUERY;
             $this->dirty = array();
 
             foreach ($this->columns() as $key => $col) {
-                $this->clean[$key] = NULL;
-                $this->dirty[$key] = NULL;
+                $this->clean[$key] = null;
+                $this->dirty[$key] = null;
             }
 
             return $this;
@@ -534,7 +534,7 @@ COLQUERY;
          *
          * Returns an array of the Column objects for a given model.
          */
-        public static function columns($class = NULL) {
+        public static function columns($class = null) {
             if (!$class)
                 $class = get_called_class();
 
@@ -551,8 +551,8 @@ COLQUERY;
                     $null = $row['allow_null'];
                     $pkey = $row['primary_key'];
 
-                    $null = $null == 't' ? TRUE : FALSE;
-                    $pkey = $pkey == 't' ? TRUE : FALSE;
+                    $null = $null == 't' ? true : false;
+                    $pkey = $pkey == 't' ? true : false;
 
                     $columns[$name] = new Column($name, $type, $null, $pkey);
                 }
@@ -581,7 +581,7 @@ COLQUERY;
          *
          * Returns a sorted array of all column names for a given model.
          */
-        public function column_names($class = NULL) {
+        public function column_names($class = null) {
             if (!$class)
                 $class = get_called_class();
 
@@ -598,7 +598,7 @@ COLQUERY;
          * table. This will usually be one-element arrays, ie "['id']", but it
          * allows us to support more complex operations.
          */
-        public static function primary_keys($class = NULL) {
+        public static function primary_keys($class = null) {
             if (!$class)
                 $class = get_called_class();
 
@@ -631,7 +631,7 @@ COLQUERY;
          * Returns a piece of a form element which will fill in the value
          * currently in the model.
          */
-        public function form($name, $comparison = NULL, $echo = TRUE) {
+        public function form($name, $comparison = null, $echo = true) {
             $cols = $this->cols();
 
             if (!array_key_exists($name, $cols))
@@ -701,7 +701,7 @@ COLQUERY;
             if (preg_match('/^load_([a-zA-Z0-9_]+)$/', $name, $matches)) {
                 $assoc = self::$associations[(string) get_class($this)];
                 if (array_key_exists($matches[1], $assoc)) {
-                    $force = count($args) ? ((boolean) $args[0]) : FALSE;
+                    $force = count($args) ? ((boolean) $args[0]) : false;
                     return $this->_load_association($matches[1], $force);
                 }
             }
@@ -717,7 +717,7 @@ COLQUERY;
          * Returns the table name for a given class. It must have been
          * previously registered with Model::associate_table().
          */
-        public static function table($class = NULL) {
+        public static function table($class = null) {
             if (!$class)
                 $class = get_called_class();
 

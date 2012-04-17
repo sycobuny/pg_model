@@ -14,8 +14,8 @@
          * spit back an error at the user when they attempt to use it.
          */
         public static function parse($str) {
-            if (($str === NULL) || ($str == ''))
-                return NULL;
+            if (($str === null) || ($str == ''))
+                return null;
 
             $ary = explode('-', $str);
 
