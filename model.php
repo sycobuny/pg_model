@@ -145,7 +145,7 @@ COLQUERY;
 
             $myclass = (string) get_class($this);
             $mytable = self::$tbl_lookup[$myclass];
-            $myid    = preg_replace('/s$/', '_id', $mytable);
+            $myid    = Inflection::singularize($mytable) . '_id';
 
             $type   = self::$associations[$myclass][$name];
             $qname  = "_assoc_{$mytable}_{$name}";
@@ -175,7 +175,7 @@ COLQUERY;
 
                     sort($tblary);
                     $jtable = join('_', $tblary);
-                    $id     = preg_replace('/s$/', '_id', $table);
+                    $id     = Inflection::singularize($table) . '_id';
 
                     $query = "SELECT $table.* FROM $table INNER JOIN $jtable " .
                              "ON $jtable.$id = $table.id WHERE $jtable.$myid " .
@@ -195,7 +195,7 @@ COLQUERY;
                 case 'mto':
                     $class  = self::$many_to_one[$myclass][$name];
                     $table  = self::$tbl_lookup[$class];
-                    $id     = preg_replace('/s$/', '_id', $table);
+                    $id     = Inflection::singularize($table) . '_id';
                     $params = array($this->column($id));
 
                     $query = "SELECT * FROM $table WHERE id = \$1";
