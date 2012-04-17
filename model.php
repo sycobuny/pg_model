@@ -169,7 +169,7 @@ COLQUERY;
                     $this->assoc[$name] =& $return;
                     return $return;
                 case 'mtm':
-                    $class  = self::$many_to_many[$name];
+                    $class  = self::$many_to_many[$myclass][$name];
                     $table  = self::$tbl_lookup[$class];
                     $tblary = array($table, $mytable);
 
