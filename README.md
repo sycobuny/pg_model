@@ -11,7 +11,7 @@ For Example
 <?php
     class Account extends Model {
         public function debit($amt) {
-            $this->set_balance($this->balance() - (double) $amt);
+            $this->balance = $this->balance - (double) $amt;
         }
     }
 

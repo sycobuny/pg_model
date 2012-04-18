@@ -692,13 +692,6 @@ COLQUERY;
          * process.
          */
         public function __call($name, $args) {
-            if (array_key_exists($name, $this->cols()))
-                return $this->column($name);
-
-            if (preg_match('/^set_([a-zA-Z0-9_]+)$/', $name, $matches))
-                if (array_key_exists($matches[1], $this->cols()))
-                    return $this->set_column($matches[1], $args[0]);
-
             if (preg_match('/^load_([a-zA-Z0-9_]+)$/', $name, $matches)) {
                 $assoc = self::$associations[(string) get_class($this)];
                 if (array_key_exists($matches[1], $assoc)) {
@@ -710,6 +703,42 @@ COLQUERY;
             $class = ((string) get_class($this));
             trigger_error("Method $class::$name does not exist",
                           E_USER_ERROR);
+        }
+
+        /**
+         * Add dynamic column read accessors
+         *
+         * Handles calls to read members of a class which are not defined by the
+         * user but should be visible to them because they are visible in the
+         * database.
+         *
+         * @param string $name The name of the column to read
+         * @throws BadColumnException
+         * @return mixed
+         */
+        public function __get($name) {
+            if (array_key_exists($name, $this->cols()))
+                return $this->column($name);
+
+            throw new BadColumnException($this->table(), $name);
+        }
+
+        /**
+         * Add dynamic column write accessors
+         *
+         * Handles calls to write members of a class which are not defined by
+         * the user but should be visible to them because they are visible in
+         * the database.
+         *
+         * @param string $name The name of the column to write
+         * @param mixed $value The value to assign
+         * @return mixed
+         */
+        public function __set($name, $value) {
+            if (array_key_exists($name, $this->cols()))
+                return $this->set_column($name, $value);
+
+            throw new BadColumnException($this->table(), $name);
         }
 
         /* public (abstract) Model::table([String])
