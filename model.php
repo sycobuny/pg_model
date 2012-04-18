@@ -1,6 +1,7 @@
 <?php
 
-    foreach (array('lib', 'database', 'column', 'inflection') as $fn) {
+    foreach (array('lib', 'database', 'column', 'inflection', 'exceptions')
+             as $fn) {
         $fn = join(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "$fn.php"));
         include_once($fn);
     }
