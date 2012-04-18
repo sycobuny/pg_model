@@ -157,6 +157,9 @@ COLQUERY;
                     $class = self::$one_to_many[$myclass][$name];
                     $table = self::$tbl_lookup[$class];
 
+                    $table = Database::quote_identifier($table);
+                    $myid  = Database::quote_identifier($myid);
+
                     $query = "SELECT * FROM $table WHERE $myid = \$1";
                     $rows  = Database::prefetch($query, $params, $qname);
 
@@ -178,6 +181,11 @@ COLQUERY;
                     $jtable = join('_', $tblary);
                     $id     = Inflection::singularize($table) . '_id';
 
+                    $table  = Database::quote_identifier($table);
+                    $jtable = Database::quote_identifier($jtable);
+                    $id     = Database::quote_identifier($id);
+                    $myid   = Database::quote_identifier($myid);
+
                     $query = "SELECT $table.* FROM $table INNER JOIN $jtable " .
                              "ON $jtable.$id = $table.id WHERE $jtable.$myid " .
                              '= $1';
@@ -198,6 +206,8 @@ COLQUERY;
                     $table  = self::$tbl_lookup[$class];
                     $id     = Inflection::singularize($table) . '_id';
                     $params = array($this->column($id));
+
+                    $table = Database::quote_identifier($table);
 
                     $query = "SELECT * FROM $table WHERE id = \$1";
                     $rows  = Database::prefetch($query, $params, $qname);
@@ -246,12 +256,17 @@ COLQUERY;
                         trigger_error("$sort is not a valid sort column",
                                       E_USER_ERROR);
 
+                    $sort = Database::quote_identifier($sort);
+
                     array_push($idx, $index . ($order == 'ASC' ? '+' : '-'));
                     array_push($order, "$sort $order");
                 }
 
                 $name = "_page_{$table}_" . join($idx, ',');
             }
+
+            $cols  = array_values(Database::quote_identifiers($cols));
+            $table = Database::quote_identifier($table);
 
             if (Database::prepared($name))
                 $query = '';
@@ -287,8 +302,10 @@ COLQUERY;
          */
         public function load($id) {
             $table = $this->table();
-            $query = "SELECT * FROM $table WHERE id = $1";
             $name  = "_load_$table";
+
+            $table = Database::quote_identifier($table);
+            $query = "SELECT * FROM $table WHERE id = $1";
 
             $data = Database::prefetch($query, array($id), $name);
             $this->_set_all($data[0]);
@@ -336,12 +353,13 @@ COLQUERY;
             $x = 1;
             $y = 1;
             foreach ($cols as $name => $col) {
-                array_push($rets, $name);
+                $qname = Database::quote_identifier($name);
+                array_push($rets, $qname);
 
                 if ($this->clean[$name] !== $this->dirty[$name]) {
                     $val = $col->prep_for_database($this->column($name));
 
-                    array_push($sets, "$name = \$$x");
+                    array_push($sets, "$qname = \$$x");
                     array_push($colx, $y);
                     array_push($vals, $val);
                     $x++;
@@ -359,6 +377,7 @@ COLQUERY;
                 $col = $cols[$name];
                 $val = $col->prep_for_database($this->column($name));
 
+                $name = Database::quote_identifier($name);
                 array_push($where, "($name = \$$x)");
                 array_push($vals, $val);
                 $x++;
@@ -370,6 +389,7 @@ COLQUERY;
             $where = "(" . join(' AND ', $where) . ")";
             $name  = "_update_{$table}_$colx";
 
+            $table   = Database::quote_identifier($table);
             $query   = "UPDATE $table SET $sets WHERE $where RETURNING $rets";
             $results = Database::prefetch($query, $vals, $name);
 
@@ -394,12 +414,13 @@ COLQUERY;
 
             $x = 1;
             foreach ($cols as $name => $col) {
-                array_push($rets, $name);
+                $qname = Database::quote_identifier($name);
+                array_push($rets, $qname);
 
                 if ($col->primary_key()) continue;
                 $val = $col->prep_for_database($this->column($name));
 
-                array_push($names, $name);
+                array_push($names, $qname);
                 array_push($holds, '$' . $x++);
                 array_push($vals,  $val);
             }
@@ -408,6 +429,7 @@ COLQUERY;
             $holds = join(', ', $holds);
             $rets  = join(', ', $rets);
 
+            $table = Database::quote_identifier($table);
             $query = "INSERT INTO $table ($names) VALUES ($holds) " .
                      "RETURNING $rets";
 

@@ -3,6 +3,7 @@
     class Database {
         private static $connection;
         private static $prepared = array();
+        private static $quoted   = array();
 
         /* public Database::connect([Array])
          * returns Resource
@@ -113,6 +114,83 @@
 
             while ($row = pg_fetch_row($r))
                 $ret[] = $row;
+
+            return $ret;
+        }
+
+        /**
+         * Prepare an identifier for safe use in a query
+         *
+         * This prepares a single identifier for use in a query and returns it.
+         * If you want to return multiple identifiers in a single query, see
+         * Database::quote_identifiers() (for which this is merely a wrapper).
+         *
+         * @param string $ident The identifier to quote
+         * @return string
+         */
+        public static function quote_identifier($ident) {
+            $out = self::quote_identifiers($ident);
+            return $out[$ident];
+        }
+
+        /**
+         * Prepare identifiers for safe use in queries
+         *
+         * Call a PostgreSQL server function to quote identifiers
+         * (table/column/function/etc. names). There's ideally a function to do
+         * this in the PHP core but it doesn't actually seem to exist. It takes
+         * a variable number of arguments and returns the results as an array
+         * where the keys are the original values and the values are the quoted
+         * versions. Note that sometimes these values will be the same, as the
+         * PG function only quotes identifiers when specifically necessary.
+         *
+         * @return array
+         */
+        public static function quote_identifiers() {
+            $ret   = array();
+            $holds = array();
+            $args  = array();
+
+            $in = func_get_args();
+            $fargs = array();
+
+            foreach ($in as $arg) {
+                if (is_array($arg)) {
+                    $fargs = array_merge($fargs, $arg);
+                }
+                else {
+                    array_push($fargs, $arg);
+                }
+            }
+
+            foreach ($fargs as $arg) {
+                if (array_key_exists($arg, self::$quoted)) {
+                    $ret[$arg] = self::$quoted[$arg];
+                }
+                else {
+                    array_push($holds, '$' . (count($holds) + 1));
+                    array_push($args, $arg);
+                }
+            }
+
+            // we already found all args cached!
+            if (!count($args)) {
+                return $ret;
+            }
+
+            $unnest = 'ARRAY[' . join(', ', $holds) . ']';
+            $query  = 'SELECT u.i, pg_catalog.quote_ident(u.i) q FROM ' .
+                      "UNNEST($unnest) u(i)";
+            $name   = '_quote_identifiers_' . count($args);
+            $rows   = self::prefetch($query, $args, $name);
+
+            foreach ($rows as $row) {
+                $key = $row['i'];
+                $val = $row['q'];
+
+                $ret[$key] = $val;
+                self::$quoted[$key] = $val;
+            }
 
             return $ret;
         }
