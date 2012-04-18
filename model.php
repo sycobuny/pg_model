@@ -1,8 +1,10 @@
 <?php
 
-    include_once('lib.php');
-    include_once('database.php');
-    include_once('column.php');
+    foreach (array('lib', 'database', 'column', 'inflection') as $fn) {
+        $fn = join(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "$fn.php"));
+        include_once($fn);
+    }
+    unset($fn);
 
     abstract class Model {
         private static $columns    = array();
@@ -48,7 +50,7 @@
             self::$tbl_lookup[$class] = $table;
             self::$cls_lookup[$table] = $class;
 
-            return NULL;
+            return null;
         }
 
         /**
@@ -69,7 +71,7 @@
             self::$one_to_many[$class][$name] = $model;
             self::$associations[$class][$name] = 'otm';
 
-            return NULL;
+            return null;
         }
 
         /**
@@ -91,7 +93,7 @@
             self::$many_to_many[$class][$name] = $model;
             self::$associations[$class][$name] = 'mtm';
 
-            return NULL;
+            return null;
         }
 
         /**
@@ -112,7 +114,7 @@
             self::$many_to_one[$class][$name] = $model;
             self::$associations[$class][$name] = 'mto';
 
-            return NULL;
+            return null;
         }
 
         /**
@@ -165,13 +167,13 @@ COLQUERY;
          * @param boolean $force Force reload of the association
          * @return array
          */
-        private function _load_association($name, $force = FALSE) {
+        private function _load_association($name, $force = false) {
             if (array_key_exists($name, $this->assoc) && !$force)
                 return $this->assoc[$name];
 
             $myclass = (string) get_class($this);
             $mytable = self::$tbl_lookup[$myclass];
-            $myid    = preg_replace('/s$/', '_id', $mytable);
+            $myid    = Inflection::singularize($mytable) . '_id';
 
             $type   = self::$associations[$myclass][$name];
             $qname  = "_assoc_{$mytable}_{$name}";
@@ -195,13 +197,13 @@ COLQUERY;
                     $this->assoc[$name] =& $return;
                     return $return;
                 case 'mtm':
-                    $class  = self::$many_to_many[$name];
+                    $class  = self::$many_to_many[$myclass][$name];
                     $table  = self::$tbl_lookup[$class];
                     $tblary = array($table, $mytable);
 
                     sort($tblary);
                     $jtable = join('_', $tblary);
-                    $id     = preg_replace('/s$/', '_id', $table);
+                    $id     = Inflection::singularize($table) . '_id';
 
                     $query = "SELECT $table.* FROM $table INNER JOIN $jtable " .
                              "ON $jtable.$id = $table.id WHERE $jtable.$myid " .
@@ -221,7 +223,7 @@ COLQUERY;
                 case 'mto':
                     $class  = self::$many_to_one[$myclass][$name];
                     $table  = self::$tbl_lookup[$class];
-                    $id     = preg_replace('/s$/', '_id', $table);
+                    $id     = Inflection::singularize($table) . '_id';
                     $params = array($this->column($id));
 
                     $query = "SELECT * FROM $table WHERE id = \$1";
@@ -272,7 +274,7 @@ COLQUERY;
                         $order = 'ASC';
 
                     $index = array_search($sort, $cols);
-                    if ($index === FALSE)
+                    if ($index === false)
                         trigger_error("$sort is not a valid sort column",
                                       E_USER_ERROR);
 
@@ -544,8 +546,8 @@ COLQUERY;
             $this->dirty = array();
 
             foreach ($this->columns() as $key => $col) {
-                $this->clean[$key] = NULL;
-                $this->dirty[$key] = NULL;
+                $this->clean[$key] = null;
+                $this->dirty[$key] = null;
             }
 
             return $this;
@@ -586,7 +588,7 @@ COLQUERY;
          * @param string $class The Model for which columns should be returned
          * @return array
          */
-        public static function columns($class = NULL) {
+        public static function columns($class = null) {
             if (!$class)
                 $class = get_called_class();
 
@@ -603,8 +605,8 @@ COLQUERY;
                     $null = $row['allow_null'];
                     $pkey = $row['primary_key'];
 
-                    $null = $null == 't' ? TRUE : FALSE;
-                    $pkey = $pkey == 't' ? TRUE : FALSE;
+                    $null = $null == 't' ? true : false;
+                    $pkey = $pkey == 't' ? true : false;
 
                     $columns[$name] = new Column($name, $type, $null, $pkey);
                 }
@@ -638,7 +640,7 @@ COLQUERY;
          * @param string $class The class for which to get columns
          * @return array
          */
-        public function column_names($class = NULL) {
+        public function column_names($class = null) {
             if (!$class)
                 $class = get_called_class();
 
@@ -658,7 +660,7 @@ COLQUERY;
          * @param string $class The class for which to get the primary key
          * @return array
          */
-        public static function primary_keys($class = NULL) {
+        public static function primary_keys($class = null) {
             if (!$class)
                 $class = get_called_class();
 
@@ -699,7 +701,7 @@ COLQUERY;
          * @param boolean $echo Whether to echo the value string or not
          * @return string
          */
-        public function form($name, $comparison = NULL, $echo = TRUE) {
+        public function form($name, $comparison = null, $echo = true) {
             $cols = $this->cols();
 
             if (!array_key_exists($name, $cols))
@@ -778,7 +780,7 @@ COLQUERY;
             if (preg_match('/^load_([a-zA-Z0-9_]+)$/', $name, $matches)) {
                 $assoc = self::$associations[(string) get_class($this)];
                 if (array_key_exists($matches[1], $assoc)) {
-                    $force = count($args) ? ((boolean) $args[0]) : FALSE;
+                    $force = count($args) ? ((boolean) $args[0]) : false;
                     return $this->_load_association($matches[1], $force);
                 }
             }
@@ -797,7 +799,7 @@ COLQUERY;
          * @param string $class The name of the class
          * @return string
          */
-        public static function table($class = NULL) {
+        public static function table($class = null) {
             if (!$class)
                 $class = get_called_class();
 

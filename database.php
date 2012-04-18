@@ -11,7 +11,7 @@
          * no options are given, defaults to using $DBCONFIG. Future calls will
          * have no effect unless the database connection closes.
          */
-        public static function connect($params = NULL) {
+        public static function connect($params = null) {
             global $DBCONFIG;
             static $DB;
 
@@ -54,7 +54,7 @@
          * Note that this means the query string is disregarded in future calls
          * which involve the same prepared statement name.
          */
-        public static function query($str, $params = array(), $name = NULL) {
+        public static function query($str, $params = array(), $name = null) {
             $p =& self::$prepared;
 
             if (($name && !array_key_exists($name, $p)) || !$name) {
@@ -80,11 +80,11 @@
          * where you always want to do something with all the rows, it may be
          * more desirable.
          */
-        public static function prefetch($str, $params = array(), $name = NULL) {
+        public static function prefetch($str, $params = array(), $name = null) {
             $ret = array();
             $r = Database::query($str, $params, $name);
 
-            if ($r === FALSE) {
+            if ($r === false) {
                 trigger_error("Query $str could not be executed: " .
                               pg_last_error(), E_USER_ERROR);
             }
@@ -106,7 +106,7 @@
          * types of queries should be rare.
          */
         public static function prefetch_int($str, $params = array(),
-                                            $name = NULL) {
+                                            $name = null) {
             $ret = array();
             $r = Database::query($str, $params, $name);
 

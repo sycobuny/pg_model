@@ -1,6 +1,7 @@
 <?php
 
-    include_once('date.php');
+    include_once(join(DIRECTORY_SEPARATOR,
+                      array(dirname(__FILE__), 'date.php')));
 
     class Column {
         private $name;
@@ -65,7 +66,7 @@
         public function stringify($value) {
             switch ($this->datatype) {
                 case 'boolean':
-                    if ($value === NULL)
+                    if ($value === null)
                         return '?';
 
                     return $value ? 'Yes' : 'No';
@@ -82,11 +83,11 @@
          * Converts a value to a String, which is a fragment of an HTML form
          * suitable for filling in the current value.
          */
-        public function formify($value, $comparison = NULL) {
-            if ($value === NULL)
+        public function formify($value, $comparison = null) {
+            if ($value === null)
                 return '';
 
-            if ($comparison !== NULL)
+            if ($comparison !== null)
                 if ($value == $comparison)
                     return ' checked';
                 else
@@ -110,8 +111,8 @@
          * the database (eg, INSERT or UPDATE queries).
          */
         public function prep_for_database($value) {
-            if ($value === NULL)
-                return NULL;
+            if ($value === null)
+                return null;
 
             switch ($this->datatype) {
                 case 'boolean':
@@ -130,18 +131,18 @@
          * inclusion in an object, depending on the datatype of the column.
          */
         public function process_value($value) {
-            if (($value === '') || ($value === NULL))
-                return NULL;
+            if (($value === '') || ($value === null))
+                return null;
 
             switch ($this->datatype) {
                 case 'boolean':
-                    if ($value === 'NULL')
-                        return NULL;
+                    if ($value === 'null')
+                        return null;
                     else if ($value === 'f' || $value === 0 ||
                              $value === false || $value === 'false' || !$value)
-                        return FALSE;
+                        return false;
                     else
-                        return TRUE;
+                        return true;
                 case 'double precision':
                 case 'numeric':
                     return (double) $value;
@@ -154,7 +155,7 @@
                     return Date::parse($value);
                 default:
                     if ($value == '')
-                        return NULL;
+                        return null;
                     else
                         return $value;
             }
