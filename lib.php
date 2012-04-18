@@ -1,7 +1,7 @@
 <?php
 
-    /* get_called_class()
-     * returns String
+    /**
+     * get_called_class()
      *
      * Defines a hack around the lack of late static binding in PHP <5.3. Only
      * defines it if it doesn't already exist (thus future-proofing against
@@ -12,6 +12,8 @@
      *
      * Pulled from PHP user comments:
      * http://www.php.net/manual/en/function.get-called-class.php#107445
+     *
+     * @return string
      */
     if (!function_exists('get_called_class')) {
          function get_called_class() {
