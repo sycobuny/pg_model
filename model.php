@@ -150,7 +150,7 @@ COLQUERY;
 
             $type   = self::$associations[$myclass][$name];
             $qname  = "_assoc_{$mytable}_{$name}";
-            $params = array($this->id());
+            $params = array($this->id);
 
             switch ($type) {
                 case 'otm':
@@ -246,7 +246,7 @@ COLQUERY;
                         trigger_error("$sort is not a valid sort column",
                                       E_USER_ERROR);
 
-                    array_push($idx, $index);
+                    array_push($idx, $index . ($order == 'ASC' ? '+' : '-'));
                     array_push($order, "$sort $order");
                 }
 
@@ -360,7 +360,7 @@ COLQUERY;
                 $val = $col->prep_for_database($this->column($name));
 
                 array_push($where, "($name = \$$x)");
-                array_push($vals,  $val);
+                array_push($vals, $val);
                 $x++;
             }
 
@@ -701,8 +701,8 @@ COLQUERY;
             }
 
             $class = ((string) get_class($this));
-            trigger_error("Method $class::$name does not exist",
-                          E_USER_ERROR);
+            $msg   = "Method $class::$name does not exist";
+            throw new BadMethodCallException($msg);
         }
 
         /**

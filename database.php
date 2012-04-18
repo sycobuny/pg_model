@@ -67,6 +67,7 @@
                 pg_prepare(Database::connect(), $name, $str);
             }
 
+            error_log("Executing query $name");
             return pg_execute(Database::connect(), $name, $params);
         }
 
