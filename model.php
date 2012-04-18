@@ -549,6 +549,12 @@ COLQUERY;
          */
         public function column_inspect($column) {
             $cols = $this->cols();
+
+            if (!array_key_exists($column, $cols)) {
+                $table = $this->table();
+                throw new BadColumnException($table, $column);
+            }
+
             return $cols[$column];
         }
 
