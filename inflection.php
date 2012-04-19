@@ -7,6 +7,13 @@
          * Matt Lanigan (@rintaun) found it for me.
          */
 
+        /* This is a lookup for values which have previously been camelized or
+         * decamelized. It serves as a cache for shortcutting processing as well
+         * as preventing certain ambiguous situations.
+         */
+        private static $camelized   = array();
+        private static $decamelized = array();
+
         /* This is the list of words which can't be counted; that is, a call to
          * singularize() or pluralize() will have no effect.
          */
@@ -109,10 +116,104 @@
             'criteri', 'phenomen', 'automat'
         );
 
+        /**
+         * Camel-case a string
+         *
+         * Converts a string from an_underscored_string to AnUnderscoredString.
+         * It caches the results, so that subsequent calls to this function or
+         * the inverse (decamelize()) will return consistent results. If the
+         * situation would be ambiguous in either direction, the desired result
+         * should be intentionally called first.
+         *
+         * @param string $str The string to camelize
+         * @return string
+         */
         public static function camelize($str) {
+            if (array_key_exists($str, self::$camelized)) {
+                return self::$camelized[$str];
+            }
+
+            $ary = explode('_', $str);
+            $out = array();
+
+            foreach ($ary as $word) {
+                $upper = strtoupper(substr($word, 0, 1)) . substr($word, 1);
+                array_push($out, $upper);
+            }
+
+            $camel = join('', $out);
+
+            if (array_key_exists($camel, self::$decamelized)) {
+                $f = __FUNCTION__;
+                $e = self::$decamelized[$camel];
+
+                throw new AmbiguousInflectionException($f, $str, $camel, $e);
+            }
+
+            self::$camelized[$str]     = $camel;
+            self::$decamelized[$camel] = $str;
+
+            return $camel;
         }
 
+        /**
+         * Convert a camel-cased string to an underscore-separated version
+         *
+         * Converts a string from ACamelCasedString to a_camel_cased_string.
+         * It caches the results, so that subsequent calls to this function or
+         * the inverse (camelize()) will return consistent results. It will
+         * interpret multiple contiguous upper-case letters as being acronyms
+         * and will group them in one word. This can lead to ambiguities with
+         * assumptions from camelize(). If the situation would be ambiguous in
+         * either direction, the desired result should be intentionally called
+         * first.
+         *
+         * @param string $str The string to downcase
+         * @return string
+         */
         public static function decamelize($str) {
+            if (array_key_exists($str, self::$decamelized)) {
+                return self::$decamelized[$str];
+            }
+
+            $chars   = str_split($str, 1);
+            $out     = '';
+            $onupper = true;
+
+            for ($x = 0; $x < count($chars); $x++) {
+                if (!strlen($out)) {
+                    $out .= strtolower($chars[$x]);
+                }
+                else if (preg_match('/[a-z]/', $chars[$x])) {
+                    $out .= $chars[$x];
+                    $onupper = false;
+                }
+                else if (preg_match('/[A-Z]/', $chars[$x])) {
+                    if ((!$onupper) ||
+                        ((count($chars) > $x) &&
+                         preg_match('/[a-z]/', $chars[$x + 1]))) {
+                        $out .= '_';
+                    }
+
+                    $out .= strtolower($chars[$x]);
+                    $onupper = true;
+                }
+                else if (preg_match('/\s/', $chars[$x])) {
+                    $out .= '_';
+                }
+            }
+
+            if (array_key_exists($out, self::$camelized)) {
+                $f = __FUNCTION__;
+                $e = self::$camelized[$out];
+
+                throw new AmbiguousInflectionException($f, $str, $out, $e);
+            }
+
+            self::$decamelized[$str] = $out;
+            self::$camelized[$out]   = $str;
+
+            return $out;
         }
 
         /* private Inflection::_suf(String, String, Array, String, String)
