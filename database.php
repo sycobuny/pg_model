@@ -16,18 +16,21 @@
             global $DBCONFIG;
             static $DB;
 
-            if (!$params)
+            if (!$params) {
                 $params = $DBCONFIG;
+            }
 
-            if (self::$connection)
+            if (self::$connection) {
                 return self::$connection;
+            }
 
             $connect_ary = array();
             foreach ($params as $key => $value) {
                 $value = preg_replace('/( |\\\\)/', '\\\\\1', $value);
 
-                if (preg_match('/ /', $value))
+                if (preg_match('/ /', $value)) {
                     $value = "'$value'";
+                }
 
                 $connect_ary[] = "$key=$value";
             }
@@ -59,10 +62,12 @@
             $p =& self::$prepared;
 
             if (($name && !array_key_exists($name, $p)) || !$name) {
-                if ($name)
+                if ($name) {
                     $p[$name] = true;
-                else
+                }
+                else {
                     $name = '';
+                }
 
                 error_log("Preparing query ($name): $str");
                 pg_prepare(Database::connect(), $name, $str);
@@ -91,8 +96,9 @@
                               pg_last_error(), E_USER_ERROR);
             }
 
-            while ($row = pg_fetch_assoc($r))
+            while ($row = pg_fetch_assoc($r)) {
                 $ret[] = $row;
+            }
 
             return $ret;
         }
@@ -112,8 +118,9 @@
             $ret = array();
             $r = Database::query($str, $params, $name);
 
-            while ($row = pg_fetch_row($r))
+            while ($row = pg_fetch_row($r)) {
                 $ret[] = $row;
+            }
 
             return $ret;
         }

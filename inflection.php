@@ -290,16 +290,19 @@
             }
 
             // this means we got an irregular pluralized result
-            if ($ret !== null)
+            if ($ret !== null) {
                 return $ret;
+            }
 
             // by this point, we've tried all non-standard approaches. just do
             // regular English pluralization.
             if (preg_match('/(.*?)([aeiou]?)y$/', $str, $m)) {
-                if ($m[2])
+                if ($m[2]) {
                     return "{$str}s";
-                else
+                }
+                else {
                     return "{$m[1]}ies";
+                }
             }
             else if (preg_match('/(.*?)([aeiou]?)z$/', $str, $m)) {
                 return "{$m[1]}{$m[2]}zzes";
@@ -340,8 +343,9 @@
             $ret = null;
             if (preg_match('/(^|_)([^_]+)ves$/', $str, $m)) {
                 $ret = self::_suf($str, $m[2], self::$fe_ves, 'ves', 'fe');
-                if ($ret !== null)
+                if ($ret !== null) {
                     return $ret;
+                }
 
                 $ret = self::_suf($str, $m[2], self::$f_ves, 'ves', 'f');
             }
@@ -356,8 +360,9 @@
             }
             else if (preg_match('/(^|_)([^_]+)a$/', $str, $m)) {
                 $ret = self::_suf($str, $m[2], self::$um_a, 'a', 'um');
-                if ($ret !== null)
+                if ($ret !== null) {
                     return $ret;
+                }
 
                 $ret = self::_suf($str, $m[2], self::$on_a, 'a', 'on');
             }
@@ -366,8 +371,9 @@
             }
 
             // we got a rule-based irregularity
-            if ($ret !== null)
+            if ($ret !== null) {
                 return $ret;
+            }
 
             // otherwise try standard English rules to decode it.
             if (preg_match('/(.*)ies$/', $str, $m)) {

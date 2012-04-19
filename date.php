@@ -14,8 +14,9 @@
          * spit back an error at the user when they attempt to use it.
          */
         public static function parse($str) {
-            if (($str === null) || ($str == ''))
+            if (($str === null) || ($str == '')) {
                 return null;
+            }
 
             $ary = explode('-', $str);
 
@@ -84,11 +85,14 @@
         public function age() {
             $years = ((integer) date('Y')) - $this->year;
 
-            if (((integer) date('n')) < $this->month)
+            if (((integer) date('n')) < $this->month) {
                 $years -= 1;
-            else if (((integer) date('n')) == $this->month)
-                if (((integer) date('j')) < $this->day)
+            }
+            else if (((integer) date('n')) == $this->month) {
+                if (((integer) date('j')) < $this->day) {
                     $years -= 1;
+                }
+            }
 
             return $years;
         }

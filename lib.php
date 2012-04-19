@@ -19,9 +19,11 @@
              $frame   = count($btrace) - 1;
              $matches = array();
 
-             foreach ($btrace as $f)
-                 if (array_key_exists('object', $f) && $f['object'])
+             foreach ($btrace as $f) {
+                 if (array_key_exists('object', $f) && $f['object']) {
                      return (string) get_class($f['object']);
+                 }
+             }
 
              while (empty($matches) && ($frame > -1)) {
                  $lines  = file($btrace[$frame]['file']);
@@ -31,8 +33,9 @@
                  if ($func == '__construct') {
                      $pat = '/new\s+([a-zA-Z0-9_]+)\s*\(/';
 
-                     if (preg_match($pat, $caller, $matches))
+                     if (preg_match($pat, $caller, $matches)) {
                          break;
+                     }
                  }
 
                  $pat = "/(\\\$?[a-zA-Z0-9_]+)\\s*(::|->)\\s*$func\\s*\\(/";
@@ -42,8 +45,9 @@
              }
 
              // stop notices for undefined indexes
-             if (!isset($matches[1]))
+             if (!isset($matches[1])) {
                  $matches[1] = null;
+             }
 
              // we've got an object trying to call a static method, so it's at
              // least one layer out.
@@ -57,17 +61,20 @@
                  $pat  = '/class[\s]+(.+?)[\s]+/si';
 
                  while (($line > 0) &&
-                        (strpos($lines[$line], 'class') === false))
+                        (strpos($lines[$line], 'class') === false)) {
                      $line--;
+                 }
 
                  preg_match($pat, $lines[$line], $matches);
              }
 
-             if ($matches[1])
+             if ($matches[1]) {
                  return $matches[1];
-             else
+             }
+             else {
                  trigger_error('Class name was not specified and could not ' .
                                'guess it', E_USER_ERROR);
+             }
          }
     }
 

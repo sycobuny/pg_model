@@ -105,7 +105,7 @@
          * primary_key for something else to process.
          */
         private static function _colquery($table) {
-            if (!Database::prepared('_colquery'))
+            if (!Database::prepared('_colquery')) {
                 $str = <<<COLQUERY
 SELECT a.attname                                   AS "name",
        format_type(t.oid, a.atttypmod)             AS db_type,
@@ -125,8 +125,10 @@ SELECT a.attname                                   AS "name",
         n.nspname !~* 'pg_*|information_schema'
   ORDER BY a.attnum;
 COLQUERY;
-            else
+            }
+            else {
                 $str = '';
+            }
 
             $str = preg_replace('/(\n|\s)+/m', ' ', $str);
             return Database::prefetch($str, array($table), '_colquery');
@@ -141,8 +143,9 @@ COLQUERY;
          * loaded unless force is set to TRUE.
          */
         private function _load_association($name, $force = false) {
-            if (array_key_exists($name, $this->assoc) && !$force)
+            if (array_key_exists($name, $this->assoc) && !$force) {
                 return $this->assoc[$name];
+            }
 
             $myclass = (string) get_class($this);
             $mytable = self::table_for_class($myclass);
@@ -240,7 +243,8 @@ COLQUERY;
 
                 foreach ($pkeys as $pkey)
                     array_push($order, "$pkey ASC");
-            } else {
+            }
+            else {
                 $idx = array();
 
                 foreach ($sorts as $sort) {
@@ -248,13 +252,15 @@ COLQUERY;
                         $sort  = $matches[1];
                         $order = strtoupper($matches[2]);
                     }
-                    else
+                    else {
                         $order = 'ASC';
+                    }
 
                     $index = array_search($sort, $cols);
-                    if ($index === false)
+                    if ($index === false) {
                         trigger_error("$sort is not a valid sort column",
                                       E_USER_ERROR);
+                    }
 
                     $sort = Database::quote_identifier($sort);
 
@@ -268,8 +274,9 @@ COLQUERY;
             $cols  = array_values(Database::quote_identifiers($cols));
             $table = Database::quote_identifier($table);
 
-            if (Database::prepared($name))
+            if (Database::prepared($name)) {
                 $query = '';
+            }
             else {
                 $cols  = join(', ', $cols);
                 $ords  = join(', ', $order);
@@ -325,10 +332,12 @@ COLQUERY;
         public function save() {
             $pkeys = $this->primary_keys();
 
-            if ($this->clean[ $pkeys[0] ])
+            if ($this->clean[$pkeys[0]]) {
                 return $this->_update();
-            else
+            }
+            else {
                 return $this->_insert();
+            }
         }
 
         /* protected Model->_update()
@@ -368,8 +377,9 @@ COLQUERY;
             }
 
             // nothing to do!
-            if (count($sets) == 0)
+            if (count($sets) == 0) {
                 return $this;
+            }
 
             foreach ($this->primary_keys() as $name) {
                 $cols = $this->columns();
@@ -417,7 +427,10 @@ COLQUERY;
                 $qname = Database::quote_identifier($name);
                 array_push($rets, $qname);
 
-                if ($col->primary_key()) continue;
+                if ($col->primary_key()) {
+                    continue;
+                }
+
                 $val = $col->prep_for_database($this->column($name));
 
                 array_push($names, $qname);
@@ -460,8 +473,9 @@ COLQUERY;
                  */
                 if (preg_match($check_re, $key, $matches)) {
                     $key = $matches[1];
-                    if (array_key_exists($key, $hash))
+                    if (array_key_exists($key, $hash)) {
                         continue;
+                    }
                 }
 
                 if (!array_key_exists($key, $cols)) {
@@ -532,8 +546,9 @@ COLQUERY;
          * Caches the static call to Model::columns() (which is expensive).
          */
         public function cols() {
-            if ($this->cols)
+            if ($this->cols) {
                 return $this->cols;
+            }
 
             $this->cols = $this->columns((string) get_class($this));
             return $this->cols;
@@ -564,8 +579,9 @@ COLQUERY;
          * Returns an array of the Column objects for a given model.
          */
         public static function columns($class = null) {
-            if (!$class)
+            if (!$class) {
                 $class = get_called_class();
+            }
 
             if (!array_key_exists($class, self::$columns)) {
                 $table = self::table_for_class($class);
@@ -599,8 +615,9 @@ COLQUERY;
         public static function sort($a, $b) {
             $aid = $a->id();
             $bid = $b->id();
-            if ($aid == $bid)
+            if ($aid == $bid) {
                 return 0;
+            }
 
             return ($aid > $bid) ? 1 : -1;
         }
@@ -611,8 +628,9 @@ COLQUERY;
          * Returns a sorted array of all column names for a given model.
          */
         public function column_names($class = null) {
-            if (!$class)
+            if (!$class) {
                 $class = get_called_class();
+            }
 
             $keys = array_keys(self::columns($class));
             sort($keys);
@@ -628,14 +646,17 @@ COLQUERY;
          * allows us to support more complex operations.
          */
         public static function primary_keys($class = null) {
-            if (!$class)
+            if (!$class) {
                 $class = get_called_class();
+            }
 
             $pkeys = array();
 
-            foreach (self::columns($class) AS $name => $col)
-                if ($col->primary_key())
+            foreach (self::columns($class) AS $name => $col) {
+                if ($col->primary_key()) {
                     array_push($pkeys, $name);
+                }
+            }
 
             return $pkeys;
         }
@@ -648,8 +669,9 @@ COLQUERY;
          * the database). If there's no such column, NULL is returned.
          */
         public function column($name) {
-            if (!array_key_exists($name, $this->cols()))
+            if (!array_key_exists($name, $this->cols())) {
                 return;
+            }
 
             return $this->dirty[$name];
         }
@@ -663,14 +685,17 @@ COLQUERY;
         public function form($name, $comparison = null, $echo = true) {
             $cols = $this->cols();
 
-            if (!array_key_exists($name, $cols))
+            if (!array_key_exists($name, $cols)) {
                 return;
+            }
 
             $col = $cols[$name];
             $val = $col->formify($this->column($name), $comparison);
 
-            if ($echo)
+            if ($echo) {
                 echo $val;
+            }
+
             return $val;
         }
 
@@ -682,8 +707,9 @@ COLQUERY;
         public function display($name) {
             $cols = $this->cols();
 
-            if (!array_key_exists($name, $cols))
+            if (!array_key_exists($name, $cols)) {
                 return;
+            }
 
             $col = $cols[$name];
             return $col->stringify($this->column($name));
@@ -701,8 +727,9 @@ COLQUERY;
         public function set_column($name, $value) {
             $cols = $this->cols();
 
-            if (!array_key_exists($name, $cols))
+            if (!array_key_exists($name, $cols)) {
                 return;
+            }
 
             $col   = $cols[$name];
             $value = $col->process_value($value);
@@ -745,8 +772,9 @@ COLQUERY;
          * @return mixed
          */
         public function __get($name) {
-            if (array_key_exists($name, $this->cols()))
+            if (array_key_exists($name, $this->cols())) {
                 return $this->column($name);
+            }
 
             throw new BadColumnException($this->table(), $name);
         }
@@ -763,8 +791,9 @@ COLQUERY;
          * @return mixed
          */
         public function __set($name, $value) {
-            if (array_key_exists($name, $this->cols()))
+            if (array_key_exists($name, $this->cols())) {
                 return $this->set_column($name, $value);
+            }
 
             throw new BadColumnException($this->table(), $name);
         }

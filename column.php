@@ -66,8 +66,9 @@
         public function stringify($value) {
             switch ($this->datatype) {
                 case 'boolean':
-                    if ($value === null)
+                    if ($value === null) {
                         return '?';
+                    }
 
                     return $value ? 'Yes' : 'No';
                 case 'date':
@@ -84,14 +85,17 @@
          * suitable for filling in the current value.
          */
         public function formify($value, $comparison = null) {
-            if ($value === null)
+            if ($value === null) {
                 return '';
+            }
 
-            if ($comparison !== null)
-                if ($value == $comparison)
+            if ($comparison !== null) {
+                if ($value == $comparison) {
                     return ' checked';
-                else
+                }
+                else {
                     return '';
+                }
 
 
             switch ($this->datatype) {
@@ -111,8 +115,9 @@
          * the database (eg, INSERT or UPDATE queries).
          */
         public function prep_for_database($value) {
-            if ($value === null)
+            if ($value === null) {
                 return null;
+            }
 
             switch ($this->datatype) {
                 case 'boolean':
@@ -131,18 +136,23 @@
          * inclusion in an object, depending on the datatype of the column.
          */
         public function process_value($value) {
-            if (($value === '') || ($value === null))
+            if (($value === '') || ($value === null)) {
                 return null;
+            }
 
             switch ($this->datatype) {
                 case 'boolean':
-                    if ($value === 'null')
+                    if ($value === 'null') {
                         return null;
+                    }
                     else if ($value === 'f' || $value === 0 ||
-                             $value === false || $value === 'false' || !$value)
+                             $value === false || $value === 'false' ||
+                             !$value) {
                         return false;
-                    else
+                    }
+                    else {
                         return true;
+                    }
                 case 'double precision':
                 case 'numeric':
                     return (double) $value;
@@ -150,14 +160,18 @@
                     return (integer) $value;
                 case 'date':
                     if (is_object($value) &&
-                        ((string) get_class($value)) == 'Date')
+                        ((string) get_class($value)) == 'Date') {
                         return $value;
+                    }
+
                     return Date::parse($value);
                 default:
-                    if ($value == '')
+                    if ($value == '') {
                         return null;
-                    else
+                    }
+                    else {
                         return $value;
+                    }
             }
         }
     }
