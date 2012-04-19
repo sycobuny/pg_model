@@ -145,7 +145,7 @@ COLQUERY;
                 return $this->assoc[$name];
 
             $myclass = (string) get_class($this);
-            $mytable = self::$tbl_lookup[$myclass];
+            $mytable = self::table_for_class($myclass);
             $myid    = Inflection::singularize($mytable) . '_id';
 
             $type   = self::$associations[$myclass][$name];
@@ -155,7 +155,7 @@ COLQUERY;
             switch ($type) {
                 case 'otm':
                     $class = self::$one_to_many[$myclass][$name];
-                    $table = self::$tbl_lookup[$class];
+                    $table = self::table_for_class($class);
 
                     $table = Database::quote_identifier($table);
                     $myid  = Database::quote_identifier($myid);
@@ -174,7 +174,7 @@ COLQUERY;
                     return $return;
                 case 'mtm':
                     $class  = self::$many_to_many[$myclass][$name];
-                    $table  = self::$tbl_lookup[$class];
+                    $table  = self::table_for_class($class);
                     $tblary = array($table, $mytable);
 
                     sort($tblary);
@@ -203,7 +203,7 @@ COLQUERY;
                     return $return;
                 case 'mto':
                     $class  = self::$many_to_one[$myclass][$name];
-                    $table  = self::$tbl_lookup[$class];
+                    $table  = self::table_for_class($class);
                     $id     = Inflection::singularize($table) . '_id';
                     $params = array($this->column($id));
 
@@ -229,7 +229,7 @@ COLQUERY;
         public static function page($num = 1, $count = 50, $sorts = 'pkeys') {
             $class = get_called_class();
 
-            $table = self::table($class);
+            $table = self::table_for_class($class);
             $cols  = self::column_names($class);
             $pkeys = self::primary_keys($class);
             $order = array();
@@ -568,7 +568,7 @@ COLQUERY;
                 $class = get_called_class();
 
             if (!array_key_exists($class, self::$columns)) {
-                $table = self::table($class);
+                $table = self::table_for_class($class);
                 $ary   = self::_colquery($table);
 
                 self::$columns[$class] = array();
@@ -775,15 +775,45 @@ COLQUERY;
          * Returns the table name for a given class. It must have been
          * previously registered with Model::associate_table().
          */
-        public static function table($class = null) {
-            if (!$class)
-                $class = get_called_class();
+        public function table() {
+            return self::table_for_class((string) get_class($this));
+        }
 
-            if (array_key_exists($class, self::$tbl_lookup))
-                return self::$tbl_lookup[$class];
-            else
-                trigger_error("Table for $class is not defined",
-                              E_USER_ERROR);
+        /**
+         * Returns the name of a table for a given class
+         *
+         * If a table for a class name hasn't been declared, it is created and
+         * cached here. The value from the cache is then returned.
+         *
+         * @param string $class The class name to lookup
+         * @return string
+         */
+        public static function table_for_class($class) {
+            if (!array_key_exists($class, self::$tbl_lookup)) {
+                $table = Inflection::pluralize(Inflection::decamelize($class));
+                self::associate_table($table, $class);
+            }
+
+            return self::$tbl_lookup[$class];
+        }
+
+        /**
+         * Returns the name of a class for a given table
+         *
+         * If a class for a given table hasn't been declared, it is named (but
+         * not created) here and cached. The value from the cache is then
+         * returned.
+         *
+         * @param string $table The table name to lookup
+         * @return string
+         */
+        public static function class_for_table($table) {
+            if (!array_key_exists($table, self::$class_lookup)) {
+                $class = Inflection::camelize(Inflection::singularize($table));
+                self::associate_table($table, $class);
+            }
+
+            return self::$class_lookup[$table];
         }
     }
 

@@ -15,8 +15,6 @@ For Example
         }
     }
 
-    Model::associate_table('accounts', 'Account');
-
     // ...
 
     $account_id = (integer) $_GET['id'];
