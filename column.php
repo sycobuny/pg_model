@@ -96,6 +96,7 @@
                 else {
                     return '';
                 }
+            }
 
 
             switch ($this->datatype) {
