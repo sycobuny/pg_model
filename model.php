@@ -22,11 +22,13 @@
         private $clean;
         private $dirty;
 
-        /* new Model()
-         * returns Model
+        /**
+         * Model constructor
          *
          * Preloads column definitions and creates an object where all columns
          * are set to NULL to prevent any "undefined key" errors.
+         *
+         * @return Model
          */
         function __construct($pkeys = null, $values = null) {
             $this->assoc = array();
@@ -41,11 +43,15 @@
             }
         }
 
-        /* public Model::associate_table(String, String)
-         * returns NULL
+        /**
+         * Associate the Model with a table
          *
          * Links a table to a class and vice versa. This is necessary because
          * PHP 5.1 does not have particularly good class introspection.
+         *
+         * @param string $table The name of the table to associate
+         * @param string $class The class name of the Model
+         * @return void
          */
         public static function associate_table($table, $class) {
             self::$tbl_lookup[$class] = $table;
@@ -54,14 +60,19 @@
             return null;
         }
 
-        /* public Model::one_to_many(String, String, String)
-         * returns NULL
+        /**
+         * Create a one-to-many relationship with another Model
          *
          * Links a Model to another Model, where the first named Model has many
          * rows for one row in the second named Model. For the inverse
          * relationship, see Model::many_to_one. The middle parameter is used to
          * declare a name for the relationship, which must be unique among all
          * associations for the second named Model.
+         *
+         * @param string $model The Model on the 'many' side of the relationship
+         * @param string $name The name of the relationship
+         * @param string $class The Model on the 'one' side of the relationship
+         * @return void
          */
         public static function one_to_many($model, $name, $class) {
             self::$one_to_many[$class][$name] = $model;
@@ -70,8 +81,8 @@
             return null;
         }
 
-        /* public Model::many_to_many(String, String, String)
-         * returns NULL
+        /**
+         * Create a many-to-many relationship with another Model
          *
          * Links a Model to another Model, where each Model has many rows for
          * each row in the other Model, linked through a join table. By
@@ -79,6 +90,11 @@
          * alphabetically sorted and joined by '_'. The middle parameter is used
          * to declare a name for the relationship, which must be unique among
          * all associations for the second named Model.
+         *
+         * @param string $model The first Model to include in the relationship
+         * @param string $name The name of the relationship
+         * @param string $class The second Model to include in the relationship
+         * @return void
          */
         public static function many_to_many($model, $name, $class) {
             self::$many_to_many[$class][$name] = $model;
@@ -87,14 +103,19 @@
             return null;
         }
 
-        /* public Model::many_to_one(String, String, String)
-         * returns NULL
+        /**
+         * Create a many-to-one relationship with another Model
          *
          * Links a Model to another Model, where the first named Model has one
          * row for many in the second named Model. For the inverse relationship,
          * see Model::one_to_many(). The middle parameter is used to declare a
          * name for the relationship, which must be unique among all
          * associations for the second named Model.
+         *
+         * @param string $model The Model on the 'one' side of the relationship
+         * @param string $name The name of the relationship
+         * @param string $class The Model on the 'many' side of the relationship
+         * @return void
          */
         public static function many_to_one($model, $name, $class) {
             self::$many_to_one[$class][$name] = $model;
@@ -103,12 +124,15 @@
             return null;
         }
 
-        /* private Model::_colquery()
-         * returns Array
+        /**
+         * Gather information about table structure
          *
          * Runs a query to fetch column definitions from a table. Returns the
          * dataset of rows of name, db_type, default, allow_null, and
          * primary_key for something else to process.
+         *
+         * @param string $table The name of the table to inspect
+         * @return array
          */
         private static function _colquery($table) {
             if (!Database::prepared('_colquery')) {
@@ -140,13 +164,17 @@ COLQUERY;
             return Database::prefetch($str, array($table), '_colquery');
         }
 
-        /* private _load_association(String, [Boolean])
-         * returns Array
+        /**
+         * Load an association which has been created previously
          *
          * Loads an association based on a preset specification given with
          * one of Model::one_to_many(), Model::many_to_many(), or
          * Model::many_to_one(). Returns a cached version if it's already been
          * loaded unless force is set to TRUE.
+         *
+         * @param string $name The name of the association to load
+         * @param boolean $force Force reload of the association
+         * @return array
          */
         private function _load_association($name, $force = false) {
             if (array_key_exists($name, $this->assoc) && !$force) {
@@ -228,12 +256,17 @@ COLQUERY;
             }
         }
 
-        /* public Model::page([Integer], [Integer])
-         * returns Array
+        /**
+         * Get paginated row data
          *
          * Returns the Nth "page" of objects, assuming Y objects per page.
          * Defaults to assuming the first page, with 50 objects per page, is
          * desired.
+         *
+         * @param integer $num The page number to retrieve
+         * @param integer $count The number of rows to retrieve
+         * @param string $sorts How the results should be sorted
+         * @return array
          */
         public static function page($num = 1, $count = 50, $sorts = 'pkeys') {
             $class = get_called_class();
@@ -305,12 +338,15 @@ COLQUERY;
             return $return;
         }
 
-        /* public Model->load(Integer)
-         * returns $this
+        /**
+         * Load a row into the Model
          *
          * Pulls data from the database for a given model into the object. Note
          * that this clears any state (modifications/etc.) that have been set
          * on the object first, for any Model-controlled columns.
+         *
+         * @param mixed $id The value of the 'id' column
+         * @return Model
          */
         public function load($pkeys) {
             $pkey_cols = self::primary_keys((string) get_class($this));
@@ -373,14 +409,16 @@ COLQUERY;
             return $this;
         }
 
-        /* public Model->save()
-         * returns $this
+        /**
+         * Save current Model data to the database
          *
          * Saves the data to the database. This method knows whether or not to
          * run an INSERT or an UPDATE operation based on whether primary keys
          * have already been set on this object. It also resets the clean and
          * dirty states to whatever the current values of the table are when the
          * query completes.
+         *
+         * @return Model
          */
         public function save() {
             $pkeys = $this->primary_keys();
@@ -393,14 +431,16 @@ COLQUERY;
             }
         }
 
-        /* protected Model->_update()
-         * returns $this;
+        /**
+         * Update the database with Model data
          *
          * Runs an UPDATE query against the database, based on the current
          * contents of the "dirty" array. Note that this query will return the
          * current value of the database, and only update affected columns. This
          * means that it MAY modify the object in unintended ways, but it WILL
          * NOT modify the database beyond the object's scope.
+         *
+         * @return Model
          */
         protected function _update() {
             $table = $this->table();
@@ -460,11 +500,13 @@ COLQUERY;
             return $this;
         }
 
-        /* protected Model->_insert()
-         * returns $this;
+        /**
+         * Create a new entry in the database based on current Model data
          *
          * Runs an INSERT query against the database, based on the current
          * contents of the "dirty" array.
+         *
+         * @return Model
          */
         protected function _insert() {
             $table = $this->table();
@@ -505,13 +547,16 @@ COLQUERY;
             return $this;
         }
 
-        /* public Model->set_all(Array)
-         * returns $this
+        /**
+         * Reset all columns contained to values with an array (dirty only)
          *
          * Sets all of the Model-controlled columns at once, clearing their
          * current values first. This assumes the values have come from an
          * HTML form or similar, and only sets the dirty array. To set both the
          * clean and the dirty array, see Model->_set_all().
+         *
+         * @param array $hash An array of values to assign to the Model
+         * @return Model
          */
         public function set_all($hash) {
             $check_re = '/^_check_([a-zA-Z0-9_]+)$/';
@@ -545,13 +590,16 @@ COLQUERY;
             return $this;
         }
 
-        /* protected Model->_set_all(Array)
-         * returns $this
+        /**
+         * Reset all columns contained to values with an array (clean and dirty)
          *
          * Sets all of the Model-controlled columns at once, clearing their
          * current values first. This assumes the values have come from the
          * database, and sets the clean array as well as the dirty array. To
          * only set the dirty array, see Model->set_all().
+         *
+         * @param array $hash
+         * @return Model
          */
         protected function _set_all($hash) {
             $cols = $this->columns();
@@ -575,11 +623,13 @@ COLQUERY;
             return $this;
         }
 
-        /* protected Model->_clear()
-         * returns $this
+        /**
+         * Clear all data from the Model
          *
          * Clears the current Model-controlled state of the object (the columns
          * and any modifications therein).
+         *
+         * @return Model
          */
         protected function _clear() {
             $this->clean = array();
@@ -593,10 +643,10 @@ COLQUERY;
             return $this;
         }
 
-        /* public Model->cols()
-         * returns Array
+        /**
+         * Cache the static call to Model::columns() (which is expensive)
          *
-         * Caches the static call to Model::columns() (which is expensive).
+         * @return array
          */
         public function cols() {
             if ($this->cols) {
@@ -607,13 +657,16 @@ COLQUERY;
             return $this->cols;
         }
 
-        /* public Model->column_inspect(String)
-         * returns Column
+        /**
+         * Return the named Column
          *
          * Returns the Column named, for use in external functions which may
          * need to query certain information such as the datatype of a column.
          * It is purely syntactic sugar, as the data is still accessible without
          * this method.
+         *
+         * @param string $column The name of the column to return
+         * @return Column
          */
         public function column_inspect($column) {
             $cols = $this->cols();
@@ -626,10 +679,11 @@ COLQUERY;
             return $cols[$column];
         }
 
-        /* public Model::columns([String])
-         * returns Array
+        /**
+         * Return an array of the Column objects for a given model
          *
-         * Returns an array of the Column objects for a given model.
+         * @param string $class The Model for which columns should be returned
+         * @return array
          */
         public static function columns($class = null) {
             if (!$class) {
@@ -659,11 +713,15 @@ COLQUERY;
             return self::$columns[$class];
         }
 
-        /* public Model::sort(Model, Model)
-         * returns Integer
+        /**
+         * Sort an array of Model objects
          *
          * A sorting function for a default sort of an array of Model objects,
          * suitable for passing to usort().
+         *
+         * @param Model $a
+         * @param Model $b
+         * @return integer
          */
         public static function sort($a, $b) {
             $aid = $a->id();
@@ -675,10 +733,11 @@ COLQUERY;
             return ($aid > $bid) ? 1 : -1;
         }
 
-        /* public Model::column_names([String])
-         * returns Array
+        /**
+         * Return a sorted array of all column names for a given model
          *
-         * Returns a sorted array of all column names for a given model.
+         * @param string $class The class for which to get columns
+         * @return array
          */
         public function column_names($class = null) {
             if (!$class) {
@@ -691,12 +750,15 @@ COLQUERY;
             return $keys;
         }
 
-        /* public Model::primary_keys([String])
-         * returns Array
+        /**
+         * Return an array of columns constituting the Model's primary key
          *
          * Returns a list of columns which constitute the primary key of this
          * table. This will usually be one-element arrays, ie "['id']", but it
          * allows us to support more complex operations.
+         *
+         * @param string $class The class for which to get the primary key
+         * @return array
          */
         public static function primary_keys($class = null) {
             if (!$class) {
@@ -714,12 +776,15 @@ COLQUERY;
             return $pkeys;
         }
 
-        /* public Model->column(String)
-         * returns Mixed
+        /**
+         * Get a column's value
          *
          * Returns the current value of a particular column (that is, whatever
          * modifications have already been done, not whatever value is stored in
          * the database). If there's no such column, NULL is returned.
+         *
+         * @param string $name The name of the column to get
+         * @return mixed
          */
         public function column($name) {
             if (!array_key_exists($name, $this->cols())) {
@@ -729,11 +794,16 @@ COLQUERY;
             return $this->dirty[$name];
         }
 
-        /* public Model->form(String, [String])
-         * returns String
+        /**
+         * Return the value portion of the form element for the specified column
          *
          * Returns a piece of a form element which will fill in the value
          * currently in the model.
+         *
+         * @param string $name The name of the column to get
+         * @param mixed $comparison The value to compare for a checkbox
+         * @param boolean $echo Whether to echo the value string or not
+         * @return string
          */
         public function form($name, $comparison = null, $echo = true) {
             $cols = $this->cols();
@@ -752,10 +822,11 @@ COLQUERY;
             return $val;
         }
 
-        /* public Model->display(String)
-         * returns String
+        /**
+         * Return a sanitized-for-HTML version of the value of a column
          *
-         * Returns a sanitized-for-HTML version of the value of a column.
+         * @param string $name The name of the column
+         * @return string
          */
         public function display($name) {
             $cols = $this->cols();
@@ -768,14 +839,18 @@ COLQUERY;
             return $col->stringify($this->column($name));
         }
 
-        /* public Model->set_column(String, Mixed)
-         * returns Mixed
+        /**
+         * Set a column to the specified value
          *
          * Sets the column specified to the value specified. If there is no such
          * column, NULL is returned. If there is a column, then the processed
          * value is returned. This may not always be the same value that was
          * sent to be set (for instance, a Date provided as a String will return
          * a Date object).
+         *
+         * @param string $name The name of the column
+         * @param mixed $value The value to set
+         * @return mixed
          */
         public function set_column($name, $value) {
             $cols = $this->cols();
@@ -791,13 +866,17 @@ COLQUERY;
             return $value;
         }
 
-        /* public Model->__call(String, Array)
-         * returns Mixed
+        /**
+         * Magic call method public
          *
          * Locates suitable handlers for methods which are not defined by hand
          * in PHP files. This allows for making calls to column_name() and
          * set_column_name() without writing out those methods, a tedious
          * process.
+         *
+         * @param string $name The name of the method being called
+         * @param array $args An array of arguments to the method
+         * @return mixed
          */
         public function __call($name, $args) {
             if (preg_match('/^load_([a-zA-Z0-9_]+)$/', $name, $matches)) {
@@ -851,11 +930,14 @@ COLQUERY;
             throw new BadColumnException($this->table(), $name);
         }
 
-        /* public (abstract) Model::table([String])
-         * returns String
+        /**
+         * Return the name of the table previously associated with the Model
          *
          * Returns the table name for a given class. It must have been
          * previously registered with Model::associate_table().
+         *
+         * @param string $class The name of the class
+         * @return string
          */
         public function table() {
             return self::table_for_class((string) get_class($this));

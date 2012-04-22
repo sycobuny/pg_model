@@ -9,10 +9,14 @@
         private $allow_null;
         private $primary_key;
 
-        /* new Column(String, String, Bool, Bool)
-         * returns Column
+        /**
+         * Column constructor
          *
-         * Constructs a column object.
+         * @param string $name The name of the column
+         * @param string $datatype The datatype of the column
+         * @param boolean $allow_null Whether NULL is an allowable value
+         * @param boolean $primary_key Whether the column is a primary key
+         * @return Column
          */
         function __construct($name, $datatype, $allow_null, $primary_key) {
             $this->name        = $name;
@@ -21,47 +25,50 @@
             $this->primary_key = (boolean) $primary_key;
         }
 
-        /* public Column->name()
-         * returns String
+        /**
+         * Return the name of the column
          *
-         * Returns the name of this column.
+         * @return string
          */
         public function name() {
             return $this->name;
         }
 
-        /* public Column->datatype()
-         * returns String
+        /**
+         * Return the datatype of the column
          *
-         * Returns the datatype of this column.
+         * @return string
          */
         public function datatype() {
             return $this->datatype;
         }
 
-        /* public Column->allow_null()
-         * returns Bool
+        /**
+         * Return whether this column allows NULL values in the database
          *
-         * Returns whether this column allows NULL values in the database.
+         * @return boolean
          */
         public function allow_null() {
             return $this->allow_null;
         }
 
-        /* public Column->primary_key()
-         * returns Bool
+        /**
+         * Returns whether this column is part of the primary key of the table
          *
-         * Returns whether this column is part of the primary key of the table.
+         * @return boolean
          */
         public function primary_key() {
             return $this->primary_key;
         }
 
-        /* public Column->stringify(String)
-         * returns String
+        /**
+         * Convert value to string for HTML
          *
          * Converts a value to a String for displaying on an HTML page, based
          * on its datatype.
+         *
+         * @param string $value The value to convert
+         * @return string
          */
         public function stringify($value) {
             switch ($this->datatype) {
@@ -78,11 +85,15 @@
             }
         }
 
-        /* public Column->formify(String, [String])
-         * returns String
+        /**
+         * Convert value to string for a form
          *
          * Converts a value to a String, which is a fragment of an HTML form
          * suitable for filling in the current value.
+         *
+         * @param string $value The value to convert
+         * @param string $comparison The value to compare for a checkbox
+         * @return string
          */
         public function formify($value, $comparison = null) {
             if ($value === null) {
@@ -109,11 +120,14 @@
             }
         }
 
-        /* public Column->prep_for_database(String)
-         * returns String
+        /**
+         * Prepare a string for the database
          *
          * Converts a value to a string suitable for insertion into q query to
          * the database (eg, INSERT or UPDATE queries).
+         *
+         * @param string $value The value to prepare
+         * @return string
          */
         public function prep_for_database($value) {
             if ($value === null) {
@@ -130,11 +144,14 @@
             }
         }
 
-        /* public Column->process_value(Mixed)
-         * returns Mixed
+        /**
+         * Process value from database or form
          *
          * Processes a value coming either from the database or an HTML form for
          * inclusion in an object, depending on the datatype of the column.
+         *
+         * @param string $value The value to process
+         * @return mixed
          */
         public function process_value($value) {
             if (($value === '') || ($value === null)) {
