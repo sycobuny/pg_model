@@ -28,11 +28,17 @@
          * Preloads column definitions and creates an object where all columns
          * are set to NULL to prevent any "undefined key" errors.
          */
-        function __construct() {
+        function __construct($pkeys = null, $values = null) {
             $this->assoc = array();
 
             $this->cols(); // get the value and discard the result
             $this->_clear();
+
+            $pkey_cols = self::primary_keys((string) get_class($this));
+
+            if ($pkeys !== NULL) {
+                $this->load($pkeys);
+            }
         }
 
         /* public Model::associate_table(String, String)
@@ -238,7 +244,6 @@ COLQUERY;
             $order = array();
 
             if ($sorts == 'pkeys') {
-                $pkeys = self::primary_keys($class);
                 $name  = "_page_{$table}_pkeys";
 
                 foreach ($pkeys as $pkey)
@@ -307,14 +312,62 @@ COLQUERY;
          * that this clears any state (modifications/etc.) that have been set
          * on the object first, for any Model-controlled columns.
          */
-        public function load($id) {
-            $table = $this->table();
+        public function load($pkeys) {
+            $pkey_cols = self::primary_keys((string) get_class($this));
+            $table     = $this->table();
+
+            if (!is_array($pkeys)) {
+                if (count($pkey_cols) == 1) {
+                    $pkeys = array($pkey_cols[0] => $pkeys);
+                }
+                else {
+                    $message = "Table $table has more than one primary key " .
+                               "column, use the array()-style load parameters";
+                    throw new BadPrimaryKeyException($table, '', $message);
+                }
+            }
+
+            $plook = array();
+            foreach ($pkey_cols as $pkey) {
+                if ((!array_key_exists($pkey, $pkeys)) || (!$pkeys[$pkey])) {
+                    $message = "Table $table expects $pkey as part of the " .
+                               "primary key.";
+                    throw new BadPrimaryKeyException($table, $pkey, $message);
+                }
+                $plook[$pkey] = true;
+            }
+
+            $where  = array();
+            $params = array();
+            foreach ($pkeys as $pkey => $value) {
+                if (!array_key_exists($pkey, $plook)) {
+                    throw new BadPrimaryKeyException($table, $pkey);
+                }
+
+                $wc = Database::quote_identifier($pkey) . ' = $' .
+                      (count($params) + 1);
+                array_push($where,  $wc);
+                array_push($params, $value);
+            }
+
             $name  = "_load_$table";
-
             $table = Database::quote_identifier($table);
-            $query = "SELECT * FROM $table WHERE id = $1";
+            $query = "SELECT * FROM $table WHERE " . join(' AND ', $where);
 
-            $data = Database::prefetch($query, array($id), $name);
+            $data = Database::prefetch($query, $params, $name);
+
+            if (!count($data)) {
+                $message = "No row exists in $table for ";
+                $outputs = array();
+
+                foreach ($pkeys as $pkey => $value) {
+                    array_push($outputs, "$pkey = $value");
+                }
+                $message .= join('; ', $outputs);
+
+                throw new NoSuchRowException($message);
+            }
+
             $this->_set_all($data[0]);
 
             return $this;
