@@ -42,8 +42,12 @@
 
             $pkey_cols = self::primary_keys((string) get_class($this));
 
-            if ($pkeys !== NULL) {
+            if ($pkeys !== null) {
                 $this->load($pkeys);
+            }
+
+            if ($values !== null) {
+                $this->set_all($values);
             }
         }
 
