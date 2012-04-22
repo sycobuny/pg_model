@@ -26,7 +26,11 @@
          * Model constructor
          *
          * Preloads column definitions and creates an object where all columns
-         * are set to NULL to prevent any "undefined key" errors.
+         * are set to NULL to prevent any "undefined key" errors. May be given
+         * a single primary key as a value, or an array with all primary keys in
+         * a multi-column primary key table to preload the object from the
+         * database. If the values array is provided, any columns given are set
+         * to those values (but not saved back to the database).
          *
          * @return Model
          */
@@ -46,8 +50,9 @@
         /**
          * Associate the Model with a table
          *
-         * Links a table to a class and vice versa. This is necessary because
-         * PHP 5.1 does not have particularly good class introspection.
+         * Links a table to a class and vice versa. This is only necessary if
+         * the table name does not meet standard naming conventions based on the
+         * name of the class.
          *
          * @param string $table The name of the table to associate
          * @param string $class The class name of the Model
@@ -346,6 +351,8 @@ COLQUERY;
          * on the object first, for any Model-controlled columns.
          *
          * @param mixed $id The value of the 'id' column
+         * @throws BadPrimaryKeyException
+         * @throws NoSuchRowException
          * @return Model
          */
         public function load($pkeys) {
@@ -870,9 +877,8 @@ COLQUERY;
          * Magic call method public
          *
          * Locates suitable handlers for methods which are not defined by hand
-         * in PHP files. This allows for making calls to column_name() and
-         * set_column_name() without writing out those methods, a tedious
-         * process.
+         * in PHP files. This allows for dynamic creation of association loading
+         * methods.
          *
          * @param string $name The name of the method being called
          * @param array $args An array of arguments to the method
@@ -920,6 +926,7 @@ COLQUERY;
          *
          * @param string $name The name of the column to write
          * @param mixed $value The value to assign
+         * @throws BadColumnException
          * @return mixed
          */
         public function __set($name, $value) {
@@ -931,12 +938,8 @@ COLQUERY;
         }
 
         /**
-         * Return the name of the table previously associated with the Model
+         * Return the name of the table for this class
          *
-         * Returns the table name for a given class. It must have been
-         * previously registered with Model::associate_table().
-         *
-         * @param string $class The name of the class
          * @return string
          */
         public function table() {
