@@ -14,7 +14,10 @@
          */
         public static function connect($params = null) {
             global $DBCONFIG;
-            static $DB;
+
+            if (self::$connection) {
+                return self::$connection;
+            }
 
             if (!$params) {
                 $params = $DBCONFIG;
@@ -23,10 +26,6 @@
             if (!isset($params)) {
                 $msg = "No parameters were passed and \$DBCONFIG is empty";
                 throw new InvalidArgumentException($msg);
-            }
-
-            if (self::$connection) {
-                return self::$connection;
             }
 
             $connect_ary = array();
