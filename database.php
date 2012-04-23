@@ -5,12 +5,18 @@
         private static $prepared = array();
         private static $quoted   = array();
 
-        /* public Database::connect([Array])
-         * returns Resource
+        /**
+         * Connect to a database
          *
-         * Connects to the database (if necessary) using the given options. If
-         * no options are given, defaults to using $DBCONFIG. Future calls will
-         * have no effect unless the database connection closes.
+         * Will connect to the database if a connection does not yet exist. If
+         * one does exist, that is returned (regardless of arguments passed). If
+         * there's a global $DBCONFIG variable, then that can be used instead of
+         * passing connection paramters. If parameters are passed, they will
+         * supercede the $DBCONFIG variable.
+         *
+         * @param string $params The connection parameters
+         * @throws InvalidArgumentException
+         * @return resource
          */
         public static function connect($params = null) {
             global $DBCONFIG;
@@ -43,24 +49,32 @@
             return self::$connection;
         }
 
-        /* public Database::prepared(String)
-         * returns Boolean
+        /**
+         * Check whether a given statement name has been prepared.
          *
-         * Checks whether a given statement has been prepared through Database
-         * already.
+         * @param string $name The name of the prepared statement
+         * @return boolean
          */
         public static function prepared($name) {
             return array_key_exists($name, self::$prepared);
         }
 
-        /* public Database::query(String, [Array], [String])
-         * returns Resource
+        /**
+         * Execute a query and return the result
          *
-         * Runs a given query. If it is named, then it prepares the statement
-         * when it is run the first time, and then executes it. If the statement
-         * was already prepared based on the name, then it is just executed.
-         * Note that this means the query string is disregarded in future calls
-         * which involve the same prepared statement name.
+         * Executes a query with optional parameters (which are automatically
+         * escaped). If a name is provided, then the query will be prepared and
+         * saved if necessary (or simply executed if it was already prepared).
+         * Unnamed queries are prepared and executed each time they are called.
+         * Note that the second and later times a named statement is called, the
+         * query string is disregarded (as the statement is already prepared).
+         * There is no way to reallocate a name for a query.
+         *
+         * @param string $str The query string to execute
+         * @param array $params The query parameters
+         * @param string $name The name of the query
+         * @throws DatabaseException
+         * @return resource
          */
         public static function query($str, $params = array(), $name = null) {
             $p =& self::$prepared;
@@ -109,15 +123,20 @@
             return $resource;
         }
 
-        /* public Database::prefetch(String, [Array], [String])
-         * returns Array
+        /**
+         * Execute a query and fetch all results
          *
-         * Runs a given query under the same rules as Model->query() (see
-         * above). This function, however, pre-processes the results rather than
-         * returning the statement Result for processing. This may not always be
-         * desired for large resultsets, but for small datasets or just datasets
-         * where you always want to do something with all the rows, it may be
-         * more desirable.
+         * This function pre-loads all results from a query into an array and
+         * returns it. Note that this is not always memory-efficient to do, and
+         * if you're not going to use all of the results, it may not be useful
+         * at all. All of the same caveats from Database::query() apply. The
+         * individual result rows are associative arrays.
+         *
+         * @param string $str The query string
+         * @param array $params The query parameters
+         * @param string $name The name of the query
+         * @throws DatabaseException
+         * @return array
          */
         public static function prefetch($str, $params = array(), $name = null) {
             $ret      = array();
@@ -130,15 +149,19 @@
             return $ret;
         }
 
-        /* public Database::prefetch_int(String, [Array], [String])
-         * returns Array
+        /**
+         * Execute a query and fetch all results
          *
-         * Runs a query and returns the resultset like Model->prefetch() (see
-         * above). This function, however, does not return an Array of
-         * associative arrays (hashes), but just an array of regular integer-
-         * indexed arrays. This will be faster for large resultsets where the
-         * columns are not specified in the query (SELECT *). However, these
-         * types of queries should be rare.
+         * This function performs the same function as Database::prefetch(), but
+         * returns an array of regular integer-indexed arrays. It is faster for
+         * cases when the names of the columns are not known to the query
+         * planner in advance of their execution (eg: 'SELECT * FROM table').
+         *
+         * @param string $str The query string
+         * @param array $params The query paramters
+         * @param string $name The query name
+         * @throws DatabaseException
+         * @return array
          */
         public static function prefetch_int($str, $params = array(),
                                             $name = null) {
