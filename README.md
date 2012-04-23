@@ -20,8 +20,7 @@ For Example
     $account_id = (integer) $_GET['id'];
     $debit      = (double)  $_GET['debit'];
 
-    $account = new Account();
-    $account->load($account_id);
+    $account = new Account($account_id);
     $account->debit($debit);
     $account->save();
 ```
