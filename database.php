@@ -96,8 +96,8 @@
             $r = Database::query($str, $params, $name);
 
             if ($r === false) {
-                trigger_error("Query $str could not be executed: " .
-                              pg_last_error(), E_USER_ERROR);
+                $msg = "Query $str could not be executed: " . pg_last_error();
+                throw new DatabaseException($msg);
             }
 
             while ($row = pg_fetch_assoc($r)) {

@@ -305,8 +305,8 @@ COLQUERY;
 
                     $index = array_search($sort, $cols);
                     if ($index === false) {
-                        trigger_error("$sort is not a valid sort column",
-                                      E_USER_ERROR);
+                        $msg = "$sort is not a valid column for sorting";
+                        throw new BadColumnException($table, $sort, $msg);
                     }
 
                     $sort = Database::quote_identifier($sort);
@@ -368,18 +368,18 @@ COLQUERY;
                     $pkeys = array($pkey_cols[0] => $pkeys);
                 }
                 else {
-                    $message = "Table $table has more than one primary key " .
-                               "column, use the array()-style load parameters";
-                    throw new BadPrimaryKeyException($table, '', $message);
+                    $msg = "Table $table has more than one primary key " .
+                           "column, use the array()-style load parameters";
+                    throw new BadPrimaryKeyException($table, '', $msg);
                 }
             }
 
             $plook = array();
             foreach ($pkey_cols as $pkey) {
                 if ((!array_key_exists($pkey, $pkeys)) || (!$pkeys[$pkey])) {
-                    $message = "Table $table expects $pkey as part of the " .
-                               "primary key.";
-                    throw new BadPrimaryKeyException($table, $pkey, $message);
+                    $msg = "Table $table expects $pkey as part of the " .
+                           "primary key.";
+                    throw new BadPrimaryKeyException($table, $pkey, $msg);
                 }
                 $plook[$pkey] = true;
             }
@@ -404,15 +404,15 @@ COLQUERY;
             $data = Database::prefetch($query, $params, $name);
 
             if (!count($data)) {
-                $message = "No row exists in $table for ";
+                $msg = "No row exists in $table for ";
                 $outputs = array();
 
                 foreach ($pkeys as $pkey => $value) {
                     array_push($outputs, "$pkey = $value");
                 }
-                $message .= join('; ', $outputs);
+                $msg .= join('; ', $outputs);
 
-                throw new NoSuchRowException($message);
+                throw new NoSuchRowException($msg);
             }
 
             $this->_set_all($data[0]);
@@ -588,10 +588,7 @@ COLQUERY;
                 }
 
                 if (!array_key_exists($key, $cols)) {
-                    $table = $this->table();
-                    trigger_error("Unknown column $key for $table",
-                                  E_USER_ERROR);
-                    continue;
+                    throw new BadColumnException($this->table(), $key);
                 }
 
                 $col = $cols[$key];
@@ -618,10 +615,7 @@ COLQUERY;
 
             foreach ($hash as $key => $value) {
                 if (!array_key_exists($key, $cols)) {
-                    $table = $this->table();
-                    trigger_error("Unknown column $key for $table",
-                                  E_USER_ERROR);
-                    continue;
+                    throw new BadColumnException($this->table(), $key);
                 }
 
                 $col = $cols[$key];

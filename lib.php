@@ -74,8 +74,8 @@
                  return $matches[1];
              }
              else {
-                 trigger_error('Class name was not specified and could not ' .
-                               'guess it', E_USER_ERROR);
+                 $msg = 'Class name was not specified and could not guess it';
+                 throw new InvalidArgumentException($msg);
              }
          }
     }
