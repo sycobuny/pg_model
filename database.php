@@ -74,11 +74,39 @@
                 }
 
                 error_log("Preparing query ($name): $str");
-                pg_prepare(Database::connect(), $name, $str);
+                $prepped = pg_prepare(Database::connect(), $name, $str);
+
+                if ($prepped === false) {
+                    $pgerr = pg_last_error();
+
+                    if ($name) {
+                        $msg = "Could not prepare query $name: $pgerr";
+                    }
+                    else {
+                        $msg = "Could not prepare query: $pgerr";
+                    }
+
+                    throw new DatabaseException($msg);
+                }
             }
 
             error_log("Executing query $name");
-            return pg_execute(Database::connect(), $name, $params);
+            $resource = pg_execute(Database::connect(), $name, $params);
+
+            if ($resource === false) {
+                $pgerr = pg_last_error();
+
+                if ($name) {
+                    $msg = "Could not execute query $name: $pgerr";
+                }
+                else {
+                    $msg = "Could not execute query: $pgerr";
+                }
+
+                throw new DatabaseException($msg);
+            }
+
+            return $resource;
         }
 
         /* public Database::prefetch(String, [Array], [String])
@@ -92,15 +120,10 @@
          * more desirable.
          */
         public static function prefetch($str, $params = array(), $name = null) {
-            $ret = array();
-            $r = Database::query($str, $params, $name);
+            $ret      = array();
+            $resource = Database::query($str, $params, $name);
 
-            if ($r === false) {
-                $msg = "Query $str could not be executed: " . pg_last_error();
-                throw new DatabaseException($msg);
-            }
-
-            while ($row = pg_fetch_assoc($r)) {
+            while ($row = pg_fetch_assoc($resource)) {
                 $ret[] = $row;
             }
 
