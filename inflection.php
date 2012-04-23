@@ -216,12 +216,21 @@
             return $out;
         }
 
-        /* private Inflection::_suf(String, String, Array, String, String)
-         * returns String
+        /**
+         * Replace slightly-irregular suffixes
+         *
+         * private Inflection::_suf(String, String, Array, String, String)
          *
          * Searches through an array to see if a given suffix matches, and if
          * so replaces the suffix value with an output suffix. Otherwise it
-         * returns NULL.
+         * returns null.
+         *
+         * @param string $str The original string
+         * @param string $match The word stem
+         * @param array $ary The list of possible words to match
+         * @param string $suf The input suffix (being removed)
+         * @param string $osuf The output suffix (being affixed)
+         * @return string
          */
         private static function _suf($str, $match, $ary, $suf, $osuf) {
             foreach ($ary as $pat) {
@@ -234,11 +243,14 @@
             return null;
         }
 
-        /* public Inflection::pluralize(String)
-         * returns String
+        /**
+         * Convert a singular word to a plural form
          *
          * Tries it's darnedest to replace the given string with a valid English
          * pluralization of said string. At the very least it'll add an s.
+         *
+         * @param string $str The word to pluralize
+         * @return string
          */
         public static function pluralize($str) {
             // handle the most obviously irregular expressions, as they require
@@ -315,10 +327,13 @@
             }
         }
 
-        /* public Inflection::singularize(String)
-         * returns String
+        /**
+         * Convert a plural word to a singular form
          *
          * Tries to singularize the given string into a standard English word.
+         *
+         * @param string $str The string to singularize
+         * @return string
          */
         public static function singularize($str) {
             // handle the most irregular cases.
