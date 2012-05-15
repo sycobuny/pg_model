@@ -729,8 +729,8 @@ COLQUERY;
          * @return integer
          */
         public static function sort($a, $b) {
-            $aid = $a->id();
-            $bid = $b->id();
+            $aid = $a->id;
+            $bid = $b->id;
             if ($aid == $bid) {
                 return 0;
             }

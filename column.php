@@ -79,7 +79,7 @@
 
                     return $value ? 'Yes' : 'No';
                 case 'date':
-                    return $value ? $value->to_s() : 'Unknown/empty';
+                    return $value ? $value->to_s() : '';
                 default:
                     return htmlspecialchars((string) $value);
             }
