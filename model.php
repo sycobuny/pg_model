@@ -1,11 +1,11 @@
 <?php
 
-    foreach (array('lib', 'database', 'column', 'inflection', 'exceptions')
-             as $fn) {
-        $fn = join(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "$fn.php"));
-        include_once($fn);
+    foreach (array('lib', 'database', 'column', 'inflection', 'exceptions',
+                   'sql_generator') as $__) {
+        $__ = join(DIRECTORY_SEPARATOR, array(dirname(__FILE__), "$__.php"));
+        include_once($__);
     }
-    unset($fn);
+    unset($__);
 
     abstract class Model {
         private static $columns    = array();

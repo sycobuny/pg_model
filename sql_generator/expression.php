@@ -1,0 +1,6 @@
+<?php
+
+    interface _QueryExpression {
+    }
+
+?>
