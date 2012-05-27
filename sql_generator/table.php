@@ -1,6 +1,7 @@
 <?php
 
-    class _QueryTable extends _QueryTableExpression {
+    class _QueryTable extends _QueryAliasableExpression
+                      implements _QueryTableExpression {
     }
 
 ?>

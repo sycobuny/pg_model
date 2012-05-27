@@ -1,6 +1,6 @@
 <?php
 
-    abstract class _QueryValueExpression extends _QueryAliasableExpression {
+    interface _QueryValueExpression extends _QueryExpression {
     }
 
 ?>

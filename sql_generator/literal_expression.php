@@ -1,6 +1,8 @@
 <?php
 
-    class _QueryLiteral implements _QueryExpression {
+    class _QueryLiteral implements _QueryTableExpression,
+                                   _QueryValeExpression, {
+
         private $string;
 
         /**

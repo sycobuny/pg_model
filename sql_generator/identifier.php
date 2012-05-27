@@ -1,6 +1,8 @@
 <?php
 
-    class _QueryIdentifier extends _QueryValueExpression {
+    class _QueryIdentifier extends _QueryAliasableExpression
+                           implements _QueryTableExpression,
+                                      _QueryValueExpression {
         private $identifier;
 
         /**

@@ -1,7 +1,8 @@
 <?php
 
-    class _QueryValueFunction extends _QueryValueExpression
-                              implements _QueryFunction {
+    class _QueryValueFunction extends _QueryAliasableExpression
+                              implements _QueryValueExpression,
+                                         _QueryFunction {
     }
 
 ?>

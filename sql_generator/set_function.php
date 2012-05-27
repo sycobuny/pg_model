@@ -1,7 +1,6 @@
 <?php
 
-    class _QuerySetFunction extends _QueryTableExpression
-                            implements _QueryFunction {
+    class _QuerySetFunction implements _QueryTableExpression, _QueryFunction {
     }
 
 ?>

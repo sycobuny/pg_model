@@ -1,6 +1,7 @@
 <?php
 
-    class Query extends _QueryTableExpression {
+    class Query extends _QueryAliasableExpression
+                implements _QueryTableExpression {
         /**
          * _QueryLiteral sugary constructor
          *
