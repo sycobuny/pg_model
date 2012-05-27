@@ -32,7 +32,7 @@
          * _QueryString object if passed a preconstructed one.
          *
          * @param string $string The SQL string to include
-         * @return _QueryLiteral
+         * @return _QueryString
          */
         public static function create($string) {
             if (is_a($string, '_QueryString')) {

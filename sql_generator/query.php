@@ -26,6 +26,19 @@
         public static function string($string) {
             return _QueryString::create($string);
         }
+
+        /**
+         * _QueryIdentifier sugary constructor
+         *
+         * Constructs a _QueryIdentifier object, or simply returns a
+         * _QueryIdentifier object if passed a preconstructed one.
+         *
+         * @param string $identifier The SQL identifier to include
+         * @return _QueryIdentifier
+         */
+        public static function ident($identifier) {
+            return _QueryIdentifier::create($identifier);
+        }
     }
 
 ?>
