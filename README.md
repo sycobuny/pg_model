@@ -35,8 +35,8 @@ my head deep into it. Also, I'm a big fan of [Sequel][sequel] for Ruby, and how
 it intuits most things based on the database structure, and doesn't require you
 to write hardly any method definitions yourself to fully query the database.
 
-It also turns out that, there are OSes which have PHP 5.1 as their primary PHP
-version, so I needed something that would work on such outdated software, so
+It also turns out that there are OSes which have PHP 5.1 as their primary PHP
+version, and I needed something that would work on such outdated software. So
 there's that, too.
 
 "Hey that sounds neat" And Other Lies
