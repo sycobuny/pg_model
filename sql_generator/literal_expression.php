@@ -31,8 +31,8 @@
         /**
          * _QueryLiteral sguary constructor
          *
-         * Constructs a _QueryLiteral object (or simply returns an
-         * the _QueryLiteral object if passed a preconstructed one.
+         * Constructs a _QueryLiteral object, or simply returns a
+         * _QueryLiteral object if passed a preconstructed one.
          *
          * @param string $string The literal SQL to include
          * @return _QueryLiteral
