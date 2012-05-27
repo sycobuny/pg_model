@@ -13,15 +13,9 @@
             if (is_a($string, '_QueryExpression')) {
                 $string = $string->sql_string();
             }
-            else if (is_object($string)) {
-                if (method_exists($string, '__toString')) {
-                    $string = "$string";
-                }
-                else {
-                    /* TODO: blow up */
-                }
-            }
-            else if (is_array($string)) {
+            else if ((is_object($string) &&
+                      !method_exists($string, '__toString')) ||
+                     is_array($string)) {
                 /* TODO: blow up */
             }
 
@@ -29,7 +23,7 @@
         }
 
         /**
-         * _QueryLiteral sguary constructor
+         * _QueryLiteral sugary constructor
          *
          * Constructs a _QueryLiteral object, or simply returns a
          * _QueryLiteral object if passed a preconstructed one.
