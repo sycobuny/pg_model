@@ -1,6 +1,8 @@
 <?php
 
-    class _QueryLimitingExpression extends _QuerySetModifyingExpression {
+    class _QueryLimitingExpression implements _QueryExpression {
+        public function sql_string() {
+        }
     }
 
 ?>

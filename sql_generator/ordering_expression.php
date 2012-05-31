@@ -1,6 +1,8 @@
 <?php
 
-    class _QueryOrderingExpression extends _QuerySetModifyingExpression {
+    class _QueryOrderingExpression implements _QueryExpression {
+        public function sql_string() {
+        }
     }
 
 ?>

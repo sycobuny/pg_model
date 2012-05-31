@@ -56,6 +56,9 @@
         public function sql_string() {
             return Database::quote_identifier($this->identifier);
         }
+
+        public function refname() {
+        }
     }
 
 ?>

@@ -1,7 +1,7 @@
 <?php
 
     class _QueryLiteral implements _QueryTableExpression,
-                                   _QueryValeExpression, {
+                                   _QueryValueExpression {
 
         private $string;
 
@@ -52,6 +52,9 @@
          */
         public function sql_string() {
             return $this->string;
+        }
+
+        public function refname() {
         }
     }
 

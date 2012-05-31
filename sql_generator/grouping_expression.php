@@ -1,6 +1,8 @@
 <?php
 
-    class _QueryGroupingExpression extends _QuerySetModifyingExpression {
+    class _QueryGroupingExpression implements _QueryExpression {
+        public function sql_string() {
+        }
     }
 
 ?>
