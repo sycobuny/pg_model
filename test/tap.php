@@ -23,7 +23,7 @@
                $__EXPECTED__TESTS__;
 
         if ($__EXPECTED__TESTS__ == 'none')
-            exit(0);
+            exit($__TEST__FAILURE__);
 
         $cnt  = $__TEST__COUNT__;
         $pass = $__TEST__SUCCESS__;
