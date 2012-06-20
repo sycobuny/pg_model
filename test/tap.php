@@ -68,18 +68,62 @@
             $__TEST__FAILURE__++;
             echo "not ok $__TEST__COUNT__$message\n";
         }
+
+        return $cond;
     }
 
     function not_ok($cond, $message = null) {
-        ok(!$cond, $message);
+        return ok(!$cond, $message);
     }
 
     function is($left, $right, $message = null) {
-        ok($left === $right, $message);
+        $ret = ok($left === $right, $message);
+        if (!$ret) {
+            echo "# expected '$right', got '$left'\n";
+        }
+
+        return $ret;
     }
 
     function is_not($left, $right, $message = null) {
-        not_ok($left === $right, $message);
+        $ret = not_ok($left === $right, $message);
+        if (!$ret) {
+            echo "# got '$left', should be not be '$right'\n";
+        }
+
+        return $ret;
+    }
+
+    function raises($callback, $args, $exception, $message = null) {
+        try {
+            call_user_func_array($callback, $args);
+        }
+        catch (Exception $e) {
+            if (!ok(is_a($e, $exception), $message)) {
+                $class = (string) get_class($e);
+                echo "# expected to raise '$exception', got '$class'\n";
+                return false;
+            }
+            return true;
+        }
+
+        ok(false, $message);
+        echo "# expected to raise '$exception', but nothing raised\n";
+        return false;
+    }
+
+    function raises_nothing($callback, $args, $message = null) {
+        try {
+            call_user_func_array($callback, $args);
+        }
+        catch (Exception $e) {
+            $class = (string) get_class($e);
+            ok(false, $message);
+            echo "# expected nothing raised, got '$class'\n";
+            return false;
+        }
+
+        return ok(true, $message);
     }
 
     function parse_contents($name, $tests) {

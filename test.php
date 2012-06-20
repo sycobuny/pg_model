@@ -41,7 +41,7 @@
         $fail += $ofail;
         $all  += $oall;
 
-        ok($opass == $oall, $fn);
+        is($opass, $oall, $fn);
     }
 
     is($pass, $all, "All $all Tests Pass");
