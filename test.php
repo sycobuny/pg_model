@@ -50,6 +50,7 @@
         }
     }
 
+    notate("finished testing files");
     is($pass, $all, "All $all subtests pass");
     $allpass = is(count($failed), 0, 'Test failures is empty');
     echo "\n";

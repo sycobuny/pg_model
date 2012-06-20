@@ -33,7 +33,10 @@
 
         if ($exp !== null) {
             if (!$all)
-                notate("planned $exp tests but only executed $cnt");
+                if ($exp > $cnt)
+                    notate("planned $exp tests but only executed $cnt");
+                else
+                    notate("planned $exp tests and executed $cnt");
             if ($fail)
                 notate("$fail tests failed, $pass passed");
         }
@@ -41,7 +44,10 @@
             notate("no test plan - $pass passed, $fail failed");
         }
 
-        exit($fail);
+        if (!$all)
+            exit(255);
+        else
+            exit($fail);
     }
 
     function notate($message) {
