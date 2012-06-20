@@ -1,5 +1,7 @@
 <?php
 
+    list($startms, $starts) = explode(' ', microtime());
+
     include_once('test/tap.php');
     no_plan();
 
@@ -45,5 +47,14 @@
     }
 
     is($pass, $all, "All $all Tests Pass");
+
+    list($endms, $ends) = explode(' ', microtime());
+
+    $slen  = ((integer) $ends) - ((integer) $starts);
+    $mslen = ((double) $endms) - ((double) $startms);
+
+    $dur = $slen + $mslen;
+
+    echo "\n# Tests ran in ${dur}s.\n";
 
 ?>
