@@ -106,7 +106,7 @@
         /* Words that end in is and convert to es in plural.
          */
         private static $is_es = array(
-            'anaylys', 'ax', 'bas', 'cris', 'diagnos', 'emphas', 'hypothes',
+            'analys', 'ax', 'bas', 'cris', 'diagnos', 'emphas', 'hypothes',
             'neuros', 'oas', 'parenthes', 'synops', 'thes'
         );
 
