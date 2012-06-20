@@ -19,6 +19,8 @@
     $fail = 0;
     $all  = 0;
 
+    $failed = array();
+
     while ($fn = readdir($dir)) {
         if ($fn == '.' || $fn == '..' || $fn == 'tap.php')
             continue;
@@ -39,14 +41,25 @@
         $ofail = $matches[2];
         $oall  = $matches[3];
 
-        $pass += $opass;
+        $pass += ($opass > $oall ? $oall : $opass);
         $fail += $ofail;
         $all  += $oall;
 
-        is($opass, $oall, $fn);
+        if (!is($opass, $oall, $fn)) {
+            array_push($failed, $fn);
+        }
     }
 
-    is($pass, $all, "All $all Tests Pass");
+    is($pass, $all, "All $all subtests pass");
+    $allpass = is(count($failed), 0, 'Test failures is empty');
+    echo "\n";
+
+    if (!$allpass) {
+        notate("Failed test files:");
+        foreach ($failed as $failure) {
+            notate("  $failure");
+        }
+    }
 
     list($endms, $ends) = explode(' ', microtime());
 
@@ -55,6 +68,6 @@
 
     $dur = $slen + $mslen;
 
-    echo "\n# Tests ran in ${dur}s.\n";
+    notate("Tests ran in ${dur}s.");
 
 ?>

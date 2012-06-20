@@ -14,7 +14,7 @@
         global $__EXPECTED__TESTS__;
 
         $__EXPECTED__TESTS__ = $tests;
-        echo "# planned to run $tests tests\n";
+        notate("planned to run $tests tests");
         echo "1..$tests\n";
     }
 
@@ -33,12 +33,12 @@
 
         if ($exp !== null) {
             if (!$all)
-                echo "# planned $exp tests but only executed $cnt\n";
+                notate("planned $exp tests but only executed $cnt");
             if ($fail)
-                echo "# $fail tests failed, $pass passed\n";
+                notate("$fail tests failed, $pass passed");
         }
         else {
-            echo "# no test plan - $pass passed, $fail failed\n";
+            notate("no test plan - $pass passed, $fail failed");
         }
 
         exit($fail);
@@ -79,7 +79,7 @@
     function is($left, $right, $message = null) {
         $ret = ok($left === $right, $message);
         if (!$ret) {
-            echo "# expected '$right', got '$left'\n";
+            notate("expected '$right', got '$left'");
         }
 
         return $ret;
@@ -88,7 +88,7 @@
     function is_not($left, $right, $message = null) {
         $ret = not_ok($left === $right, $message);
         if (!$ret) {
-            echo "# got '$left', should be not be '$right'\n";
+            notate("got '$left', should be not be '$right'");
         }
 
         return $ret;
@@ -101,14 +101,14 @@
         catch (Exception $e) {
             if (!ok(is_a($e, $exception), $message)) {
                 $class = (string) get_class($e);
-                echo "# expected to raise '$exception', got '$class'\n";
+                notate("# expected to raise '$exception', got '$class'");
                 return false;
             }
             return true;
         }
 
         ok(false, $message);
-        echo "# expected to raise '$exception', but nothing raised\n";
+        notate("expected to raise '$exception', but nothing raised");
         return false;
     }
 
@@ -119,7 +119,7 @@
         catch (Exception $e) {
             $class = (string) get_class($e);
             ok(false, $message);
-            echo "# expected nothing raised, got '$class'\n";
+            notate("expected nothing raised, got '$class'");
             return false;
         }
 
@@ -147,7 +147,7 @@
 
                 $test = $matches[1];
                 if ($test != $current)
-                    echo "# bad test! $name test $test (expected $current)!\n";
+                    notate("bad test! $name test $test (expected $current)!");
             }
             else if (preg_match('/^not ok (\d+)/', $line, $matches)) {
                 $current++;
@@ -155,17 +155,14 @@
 
                 $test = $matches[1];
                 if ($test != $current)
-                    echo "# bad test! $name test $test (expected $current)!\n";
+                    notate("bad test! $name test $test (expected $current)!");
             }
             else if (!preg_match('/^\#/', $line)) {
-                echo "# unknown output format $line ($name:$lineno)\n";
+                notate("unknown output format $line ($name:$lineno)");
             }
         }
 
-        echo "# $name $pass/$count\n";
-
-        if ($pass > $count)
-            $pass = $count;
+        notate("$name $pass/$count");
 
         return "$pass/$fail/$count";
     }
