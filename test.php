@@ -45,7 +45,9 @@
         $fail += $ofail;
         $all  += $oall;
 
-        if (!is($opass, $oall, $fn)) {
+        $name = "$fn ($oall subtests)";
+
+        if (!is($opass, $oall, $name)) {
             array_push($failed, $fn);
         }
     }

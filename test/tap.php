@@ -168,8 +168,6 @@
             }
         }
 
-        notate("$name $pass/$count");
-
         return "$pass/$fail/$count";
     }
 
