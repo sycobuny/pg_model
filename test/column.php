@@ -33,7 +33,7 @@
     is($column->process_value('true'),  true, 'Setting "true" returns true');
     is($column->process_value(0),       false, 'Setting 0 returns false');
     is($column->process_value(false),   false, 'Setting false returns false');
-    is($column->process_value('false'), false, 'setting "false" returns true');
+    is($column->process_value('false'), false, 'Setting "false" returns true');
 
     // boolean prep_for_database() checks
     is($column->prep_for_database(true),  't',  'Prepping true returns "t"');
