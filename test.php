@@ -3,7 +3,7 @@
     list($startms, $starts) = explode(' ', microtime());
 
     include_once('test/tap.php');
-    no_plan();
+    $tests = 2;
 
     $pid = posix_getpid();
     $cmd = "lsof -p $pid | grep txt | head -n1 | awk '{print \$9 }'";
@@ -19,12 +19,19 @@
     $fail = 0;
     $all  = 0;
 
+    $files  = array();
     $failed = array();
 
     while ($fn = readdir($dir)) {
         if ($fn == '.' || $fn == '..' || $fn == 'tap.php')
             continue;
+        array_push($files, $fn);
+    }
 
+    $tests += count($files);
+    plan($tests);
+
+    foreach ($files as $fn) {
         $file = join(DIRECTORY_SEPARATOR, array($td, $fn));
         $file = '"' . preg_replace('/\"/', '\\"', $file) . '"';
         $exec = "(cd $tdq && $bin $file)";
