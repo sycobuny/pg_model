@@ -147,8 +147,9 @@
         /**
          * Process value from database or form
          *
-         * Processes a value coming either from the database or an HTML form for
-         * inclusion in an object, depending on the datatype of the column.
+         * Processes a value coming either from the database or an HTML form
+         * for inclusion in an object, depending on the datatype of the
+         * column.
          *
          * @param string $value The value to process
          * @return mixed

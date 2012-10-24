@@ -8,7 +8,8 @@
          * BadColumnException constructor
          *
          * Creates a new BadColumnException, which saves the table and column
-         * name in question, and generates a default error message if required.
+         * name in question, and generates a default error message if
+         * required.
          *
          * @param string $table The table which caused the error
          * @param string $column The column which caused the error
@@ -16,7 +17,8 @@
          * @param int $code The exception code
          * @return BadColumnException
          */
-        public function __construct($table, $column, $message = '', $code = 0) {
+        public function __construct($table, $column, $message = '',
+                                    $code = 0) {
             $this->table  = $table;
             $this->column = $column;
 

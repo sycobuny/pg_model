@@ -7,8 +7,8 @@
      * defines it if it doesn't already exist (thus future-proofing against
      * upgrades).
      *
-     * NB: This code does not work if multiple calls are made on the same line.
-     * Use with care.
+     * NB: This code does not work if multiple calls are made on the same
+     * line. Use with care.
      *
      * Pulled from PHP user comments:
      * http://www.php.net/manual/en/function.get-called-class.php#107445

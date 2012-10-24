@@ -10,9 +10,9 @@
          * AmbiguousInflectionException constructor
          *
          * Creates a new AmbiguousInflectionException, which saves the name of
-         * the inflection function in question, the original uninflected value,
-         * the calculated value, and what was found in a cached version (which
-         * should be different). It also generates an error message, if
+         * the inflection function in question, the original uninflected
+         * value, the calculated value, and what was found in a cached version
+         * (which should be different). It also generates an error message, if
          * required.
          *
          * @param string $function The function which generated the error
@@ -22,8 +22,8 @@
          * @param int $code The exception code
          * @return AmbiguousInflectionException
          */
-        public function __construct($function, $original, $inflected, $existing,
-                                    $message = '', $code = 0) {
+        public function __construct($function, $original, $inflected,
+                                    $existing, $message = '', $code = 0) {
             $this->function  = $function;
             $this->original  = $original;
             $this->inflected = $inflected;

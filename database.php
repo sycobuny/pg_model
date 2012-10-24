@@ -9,10 +9,10 @@
          * Connect to a database
          *
          * Will connect to the database if a connection does not yet exist. If
-         * one does exist, that is returned (regardless of arguments passed). If
-         * there's a global $DBCONFIG variable, then that can be used instead of
-         * passing connection paramters. If parameters are passed, they will
-         * supercede the $DBCONFIG variable.
+         * one does exist, that is returned (regardless of arguments passed).
+         * If there's a global $DBCONFIG variable, then that can be used
+         * instead of passing connection paramters. If parameters are passed,
+         * they will supercede the $DBCONFIG variable.
          *
          * @param string $params The connection parameters
          * @throws InvalidArgumentException
@@ -63,12 +63,13 @@
          * Execute a query and return the result
          *
          * Executes a query with optional parameters (which are automatically
-         * escaped). If a name is provided, then the query will be prepared and
-         * saved if necessary (or simply executed if it was already prepared).
-         * Unnamed queries are prepared and executed each time they are called.
-         * Note that the second and later times a named statement is called, the
-         * query string is disregarded (as the statement is already prepared).
-         * There is no way to reallocate a name for a query.
+         * escaped). If a name is provided, then the query will be prepared
+         * and saved if necessary (or simply executed if it was already
+         * prepared). Unnamed queries are prepared and executed each time they
+         * are called. Note that the second and later times a named statement
+         * is called, the query string is disregarded (as the statement is
+         * already prepared). There is no way to reallocate a name for a
+         * query.
          *
          * @param string $str The query string to execute
          * @param array $params The query parameters
@@ -127,10 +128,10 @@
          * Execute a query and fetch all results
          *
          * This function pre-loads all results from a query into an array and
-         * returns it. Note that this is not always memory-efficient to do, and
-         * if you're not going to use all of the results, it may not be useful
-         * at all. All of the same caveats from Database::query() apply. The
-         * individual result rows are associative arrays.
+         * returns it. Note that this is not always memory-efficient to do,
+         * and if you're not going to use all of the results, it may not be
+         * useful at all. All of the same caveats from Database::query()
+         * apply. The individual result rows are associative arrays.
          *
          * @param string $str The query string
          * @param array $params The query parameters
@@ -138,7 +139,8 @@
          * @throws DatabaseException
          * @return array
          */
-        public static function prefetch($str, $params = array(), $name = null) {
+        public static function prefetch($str, $params = array(),
+                                        $name = null) {
             $ret      = array();
             $resource = Database::query($str, $params, $name);
 
@@ -152,10 +154,11 @@
         /**
          * Execute a query and fetch all results
          *
-         * This function performs the same function as Database::prefetch(), but
-         * returns an array of regular integer-indexed arrays. It is faster for
-         * cases when the names of the columns are not known to the query
-         * planner in advance of their execution (eg: 'SELECT * FROM table').
+         * This function performs the same function as Database::prefetch(),
+         * but returns an array of regular integer-indexed arrays. It is
+         * faster for cases when the names of the columns are not known to the
+         * query planner in advance of their execution (eg: 'SELECT * FROM
+         * table').
          *
          * @param string $str The query string
          * @param array $params The query paramters
@@ -178,9 +181,10 @@
         /**
          * Prepare an identifier for safe use in a query
          *
-         * This prepares a single identifier for use in a query and returns it.
-         * If you want to return multiple identifiers in a single query, see
-         * Database::quote_identifiers() (for which this is merely a wrapper).
+         * This prepares a single identifier for use in a query and returns
+         * it. If you want to return multiple identifiers in a single query,
+         * see Database::quote_identifiers() (for which this is merely a
+         * wrapper).
          *
          * @param string $ident The identifier to quote
          * @return string
@@ -194,12 +198,13 @@
          * Prepare identifiers for safe use in queries
          *
          * Call a PostgreSQL server function to quote identifiers
-         * (table/column/function/etc. names). There's ideally a function to do
-         * this in the PHP core but it doesn't actually seem to exist. It takes
-         * a variable number of arguments and returns the results as an array
-         * where the keys are the original values and the values are the quoted
-         * versions. Note that sometimes these values will be the same, as the
-         * PG function only quotes identifiers when specifically necessary.
+         * (table/column/function/etc. names). There's ideally a function to
+         * do this in the PHP core but it doesn't actually seem to exist. It
+         * takes a variable number of arguments and returns the results as an
+         * array where the keys are the original values and the values are the
+         * quoted versions. Note that sometimes these values will be the same,
+         * as the PG function only quotes identifiers when specifically
+         * necessary.
          *
          * @return array
          */

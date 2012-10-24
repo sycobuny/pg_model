@@ -13,7 +13,8 @@
     is($column->primary_key(), true,      'Column primary key is correct');
 
     // general-purpose process_value() checks
-    is($column->process_value(''),   null, 'Setting blank string returns null');
+    is($column->process_value(''),   null, 'Setting blank string returns ' .
+                                           'null');
     is($column->process_value(null), null, 'Setting null returns null');
 
     // general-purpose prep_for_database() checks
@@ -33,7 +34,8 @@
     is($column->process_value('true'),  true, 'Setting "true" returns true');
     is($column->process_value(0),       false, 'Setting 0 returns false');
     is($column->process_value(false),   false, 'Setting false returns false');
-    is($column->process_value('false'), false, 'Setting "false" returns true');
+    is($column->process_value('false'), false, 'Setting "false" returns ' .
+                                               'true');
 
     // boolean prep_for_database() checks
     is($column->prep_for_database(true),  't',  'Prepping true returns "t"');
@@ -51,6 +53,7 @@
     is($column->name(),        'field_again', 'Column name is correct');
     is($column->datatype(),    $type,         'Column datatype is correct');
     is($column->allow_null(),  false,         'Column nullable is correct');
-    is($column->primary_key(), false,         'Column primary key is correct');
+    is($column->primary_key(), false,         'Column primary key is ' .
+                                              'correct');
 
 ?>

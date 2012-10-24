@@ -22,9 +22,11 @@
         array('analysis',    'analyses',     'irregular - is => es'),
         array('some_person', 'some_people',  'separates words'),
         array('solliloquy',  'solliloquys',  'regular - ends in [vowel]y'),
-        array('symphony',    'symphonies',   'regular - ends in [consonant]y'),
+        array('symphony',    'symphonies',   'regular - ends in ' .
+                                             '[consonant]y'),
         array('quiz',        'quizzes',      'regular - ends in [vowel]z'),
-        array('church',      'churches',     'regular - ends in s-like sound'),
+        array('church',      'churches',     'regular - ends in s-like ' .
+                                             'sound'),
         array('cow',         'cows',         'regular'),
     );
 

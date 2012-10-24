@@ -84,8 +84,8 @@
         /**
          * Calculate an age based on this date
          *
-         * Returns the number of whole years that have passed between this Date
-         * and now.
+         * Returns the number of whole years that have passed between this
+         * Date and now.
          *
          * @return integer
          */

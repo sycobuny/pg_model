@@ -27,10 +27,10 @@
          *
          * Preloads column definitions and creates an object where all columns
          * are set to NULL to prevent any "undefined key" errors. May be given
-         * a single primary key as a value, or an array with all primary keys in
-         * a multi-column primary key table to preload the object from the
-         * database. If the values array is provided, any columns given are set
-         * to those values (but not saved back to the database).
+         * a single primary key as a value, or an array with all primary keys
+         * in a multi-column primary key table to preload the object from the
+         * database. If the values array is provided, any columns given are
+         * set to those values (but not saved back to the database).
          *
          * @return Model
          */
@@ -55,8 +55,8 @@
          * Associate the Model with a table
          *
          * Links a table to a class and vice versa. This is only necessary if
-         * the table name does not meet standard naming conventions based on the
-         * name of the class.
+         * the table name does not meet standard naming conventions based on
+         * the name of the class.
          *
          * @param string $table The name of the table to associate
          * @param string $class The class name of the Model
@@ -72,15 +72,15 @@
         /**
          * Create a one-to-many relationship with another Model
          *
-         * Links a Model to another Model, where the first named Model has many
-         * rows for one row in the second named Model. For the inverse
-         * relationship, see Model::many_to_one. The middle parameter is used to
-         * declare a name for the relationship, which must be unique among all
-         * associations for the second named Model.
+         * Links a Model to another Model, where the first named Model has
+         * many rows for one row in the second named Model. For the inverse
+         * relationship, see Model::many_to_one. The middle parameter is used
+         * to declare a name for the relationship, which must be unique among
+         * all associations for the second named Model.
          *
-         * @param string $model The Model on the 'many' side of the relationship
+         * @param string $model The Model on the many side of the relationship
          * @param string $name The name of the relationship
-         * @param string $class The Model on the 'one' side of the relationship
+         * @param string $class The Model on the one side of the relationship
          * @return void
          */
         public static function one_to_many($model, $name, $class) {
@@ -96,13 +96,13 @@
          * Links a Model to another Model, where each Model has many rows for
          * each row in the other Model, linked through a join table. By
          * convention, the join table is expected to be the two table names,
-         * alphabetically sorted and joined by '_'. The middle parameter is used
-         * to declare a name for the relationship, which must be unique among
-         * all associations for the second named Model.
+         * alphabetically sorted and joined by '_'. The middle parameter is
+         * used to declare a name for the relationship, which must be unique
+         * among all associations for the second named Model.
          *
-         * @param string $model The first Model to include in the relationship
+         * @param string $model The 1st Model to include in the relationship
          * @param string $name The name of the relationship
-         * @param string $class The second Model to include in the relationship
+         * @param string $class The 2nd Model to include in the relationship
          * @return void
          */
         public static function many_to_many($model, $name, $class) {
@@ -116,14 +116,14 @@
          * Create a many-to-one relationship with another Model
          *
          * Links a Model to another Model, where the first named Model has one
-         * row for many in the second named Model. For the inverse relationship,
-         * see Model::one_to_many(). The middle parameter is used to declare a
-         * name for the relationship, which must be unique among all
-         * associations for the second named Model.
+         * row for many in the second named Model. For the inverse
+         * relationship, see Model::one_to_many(). The middle parameter is
+         * used to declare a name for the relationship, which must be unique
+         * among all associations for the second named Model.
          *
-         * @param string $model The Model on the 'one' side of the relationship
+         * @param string $model The Model on the one side of the relationship
          * @param string $name The name of the relationship
-         * @param string $class The Model on the 'many' side of the relationship
+         * @param string $class The Model on the many side of the relationship
          * @return void
          */
         public static function many_to_one($model, $name, $class) {
@@ -232,9 +232,9 @@ COLQUERY;
                     $id     = Database::quote_identifier($id);
                     $myid   = Database::quote_identifier($myid);
 
-                    $query = "SELECT $table.* FROM $table INNER JOIN $jtable " .
-                             "ON $jtable.$id = $table.id WHERE $jtable.$myid " .
-                             '= $1';
+                    $query = "SELECT $table.* FROM $table INNER JOIN " .
+                             "$jtable ON $jtable.$id = $table.id WHERE " .
+                             "$jtable.$myid = \$1";
                     $rows  = Database::prefetch($query, $params, $qname);
 
                     $return = array();
@@ -295,7 +295,8 @@ COLQUERY;
                 $idx = array();
 
                 foreach ($sorts as $sort) {
-                    if (preg_match('/^(.*)\s*(ASC|DESC)$/i', $sort, $matches)) {
+                    if (preg_match('/^(.*)\s*(ASC|DESC)$/i', $sort,
+                                   $matches)) {
                         $sort  = $matches[1];
                         $order = strtoupper($matches[2]);
                     }
@@ -335,7 +336,8 @@ COLQUERY;
             $offset = ($num - 1) * $count;
 
             $return = array();
-            $result = Database::prefetch($query, array($count, $offset), $name);
+            $result = Database::prefetch($query, array($count, $offset),
+                                         $name);
 
             foreach ($result as $row) {
                 $obj = new $class();
@@ -350,9 +352,9 @@ COLQUERY;
         /**
          * Load a row into the Model
          *
-         * Pulls data from the database for a given model into the object. Note
-         * that this clears any state (modifications/etc.) that have been set
-         * on the object first, for any Model-controlled columns.
+         * Pulls data from the database for a given model into the object.
+         * Note that this clears any state (modifications/etc.) that have been
+         * set on the object first, for any Model-controlled columns.
          *
          * @param mixed $id The value of the 'id' column
          * @throws BadPrimaryKeyException
@@ -426,8 +428,8 @@ COLQUERY;
          * Saves the data to the database. This method knows whether or not to
          * run an INSERT or an UPDATE operation based on whether primary keys
          * have already been set on this object. It also resets the clean and
-         * dirty states to whatever the current values of the table are when the
-         * query completes.
+         * dirty states to whatever the current values of the table are when
+         * the query completes.
          *
          * @return Model
          */
@@ -447,9 +449,9 @@ COLQUERY;
          *
          * Runs an UPDATE query against the database, based on the current
          * contents of the "dirty" array. Note that this query will return the
-         * current value of the database, and only update affected columns. This
-         * means that it MAY modify the object in unintended ways, but it WILL
-         * NOT modify the database beyond the object's scope.
+         * current value of the database, and only update affected columns.
+         * This means that it MAY modify the object in unintended ways, but it
+         * WILL NOT modify the database beyond the object's scope.
          *
          * @return Model
          */
@@ -563,8 +565,8 @@ COLQUERY;
          *
          * Sets all of the Model-controlled columns at once, clearing their
          * current values first. This assumes the values have come from an
-         * HTML form or similar, and only sets the dirty array. To set both the
-         * clean and the dirty array, see Model->_set_all().
+         * HTML form or similar, and only sets the dirty array. To set both
+         * the clean and the dirty array, see Model->_set_all().
          *
          * @param array $hash An array of values to assign to the Model
          * @return Model
@@ -574,11 +576,12 @@ COLQUERY;
             $cols     = $this->columns();
 
             foreach ($hash as $key => $value) {
-                /* if there's a value _check_some_col that we come across, then
-                 * reset the $key. this can be used to fill a value in case
-                 * the HTML form doesn't send checkboxes (which is the case in
-                 * most browsers). Since it's not always going to need to be
-                 * used, we'll skip it if there actually *was* a value supplied.
+                /* if there's a value _check_some_col that we come across,
+                 * then reset the $key. this can be used to fill a value in
+                 * case the HTML form doesn't send checkboxes (which is the
+                 * case in most browsers). Since it's not always going to need
+                 * to be used, we'll skip it if there actually *was* a value
+                 * supplied.
                  */
                 if (preg_match($check_re, $key, $matches)) {
                     $key = $matches[1];
@@ -599,7 +602,7 @@ COLQUERY;
         }
 
         /**
-         * Reset all columns contained to values with an array (clean and dirty)
+         * Reset all columns contained to values with an array (clean + dirty)
          *
          * Sets all of the Model-controlled columns at once, clearing their
          * current values first. This assumes the values have come from the
@@ -631,8 +634,8 @@ COLQUERY;
         /**
          * Clear all data from the Model
          *
-         * Clears the current Model-controlled state of the object (the columns
-         * and any modifications therein).
+         * Clears the current Model-controlled state of the object (the
+         * columns and any modifications therein).
          *
          * @return Model
          */
@@ -667,8 +670,8 @@ COLQUERY;
          *
          * Returns the Column named, for use in external functions which may
          * need to query certain information such as the datatype of a column.
-         * It is purely syntactic sugar, as the data is still accessible without
-         * this method.
+         * It is purely syntactic sugar, as the data is still accessible
+         * without this method.
          *
          * @param string $column The name of the column to return
          * @return Column
@@ -785,8 +788,8 @@ COLQUERY;
          * Get a column's value
          *
          * Returns the current value of a particular column (that is, whatever
-         * modifications have already been done, not whatever value is stored in
-         * the database). If there's no such column, NULL is returned.
+         * modifications have already been done, not whatever value is stored
+         * in the database). If there's no such column, NULL is returned.
          *
          * @param string $name The name of the column to get
          * @return mixed
@@ -800,7 +803,7 @@ COLQUERY;
         }
 
         /**
-         * Return the value portion of the form element for the specified column
+         * Return the value portion of a form element for the specified column
          *
          * Returns a piece of a form element which will fill in the value
          * currently in the model.
@@ -847,11 +850,11 @@ COLQUERY;
         /**
          * Set a column to the specified value
          *
-         * Sets the column specified to the value specified. If there is no such
-         * column, NULL is returned. If there is a column, then the processed
-         * value is returned. This may not always be the same value that was
-         * sent to be set (for instance, a Date provided as a String will return
-         * a Date object).
+         * Sets the column specified to the value specified. If there is no
+         * such column, NULL is returned. If there is a column, then the
+         * processed value is returned. This may not always be the same value
+         * that was sent to be set (for instance, a Date provided as a String
+         * will return a Date object).
          *
          * @param string $name The name of the column
          * @param mixed $value The value to set
@@ -875,8 +878,8 @@ COLQUERY;
          * Magic call method public
          *
          * Locates suitable handlers for methods which are not defined by hand
-         * in PHP files. This allows for dynamic creation of association loading
-         * methods.
+         * in PHP files. This allows for dynamic creation of association
+         * loading methods.
          *
          * @param string $name The name of the method being called
          * @param array $args An array of arguments to the method
@@ -899,9 +902,9 @@ COLQUERY;
         /**
          * Add dynamic column read accessors
          *
-         * Handles calls to read members of a class which are not defined by the
-         * user but should be visible to them because they are visible in the
-         * database.
+         * Handles calls to read members of a class which are not defined by
+         * the user but should be visible to them because they are visible in
+         * the database.
          *
          * @param string $name The name of the column to read
          * @throws BadColumnException
@@ -955,7 +958,9 @@ COLQUERY;
          */
         public static function table_for_class($class) {
             if (!array_key_exists($class, self::$tbl_lookup)) {
-                $table = Inflection::pluralize(Inflection::decamelize($class));
+                $table = Inflection::pluralize(
+                             Inflection::decamelize($class)
+                         );
                 self::associate_table($table, $class);
             }
 
@@ -974,7 +979,9 @@ COLQUERY;
          */
         public static function class_for_table($table) {
             if (!array_key_exists($table, self::$class_lookup)) {
-                $class = Inflection::camelize(Inflection::singularize($table));
+                $class = Inflection::camelize(
+                             Inflection::singularize($table)
+                         );
                 self::associate_table($table, $class);
             }
 

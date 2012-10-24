@@ -8,14 +8,14 @@
          */
 
         /* This is a lookup for values which have previously been camelized or
-         * decamelized. It serves as a cache for shortcutting processing as well
-         * as preventing certain ambiguous situations.
+         * decamelized. It serves as a cache for shortcutting processing as
+         * well as preventing certain ambiguous situations.
          */
         private static $camelized   = array();
         private static $decamelized = array();
 
-        /* This is the list of words which can't be counted; that is, a call to
-         * singularize() or pluralize() will have no effect.
+        /* This is the list of words which can't be counted; that is, a call
+         * to singularize() or pluralize() will have no effect.
          */
         private static $uncountable = array(
             'cod', 'deer', 'fish', 'offspring', 'sheep', 'trout', 'barracks',
@@ -119,11 +119,11 @@
         /**
          * Camel-case a string
          *
-         * Converts a string from an_underscored_string to AnUnderscoredString.
-         * It caches the results, so that subsequent calls to this function or
-         * the inverse (decamelize()) will return consistent results. If the
-         * situation would be ambiguous in either direction, the desired result
-         * should be intentionally called first.
+         * Converts a string from an_underscored_string to
+         * AnUnderscoredString. It caches the results, so that subsequent
+         * calls to this function or the inverse (decamelize()) will return
+         * consistent results. If the situation would be ambiguous in either
+         * direction, the desired result should be intentionally called first.
          *
          * @param string $str The string to camelize
          * @return string
@@ -246,15 +246,16 @@
         /**
          * Convert a singular word to a plural form
          *
-         * Tries it's darnedest to replace the given string with a valid English
-         * pluralization of said string. At the very least it'll add an s.
+         * Tries it's darnedest to replace the given string with a valid
+         * English pluralization of said string. At the very least it'll add
+         * an s.
          *
          * @param string $str The word to pluralize
          * @return string
          */
         public static function pluralize($str) {
-            // handle the most obviously irregular expressions, as they require
-            // very little pattern matching.
+            // handle the most obviously irregular expressions, as they
+            // require very little pattern matching.
             if (preg_match('/(^|.*_)([^_]+)$/', $str, $m)) {
                 if (in_array($m[2], self::$uncountable)) {
                     return $str;
@@ -276,7 +277,8 @@
             $ret = null;
             if (preg_match('/(^|_)([^_]+)f(e?)$/', $str, $m)) {
                 if ($m[3]) {
-                    $ret = self::_suf($str, $m[2], self::$fe_ves, 'fe', 'ves');
+                    $ret = self::_suf($str, $m[2], self::$fe_ves, 'fe',
+                                      'ves');
                 }
                 else {
                     $ret = self::_suf($str, $m[2], self::$f_ves, 'f', 'ves');
@@ -341,8 +343,11 @@
                 if (in_array($m[2], self::$uncountable)) {
                     return $str;
                 }
-                else if (($idx = array_search($m[2], self::$irreg)) !== false) {
-                    return $m[1] . $idx;
+                else {
+                    $idx = array_search($m[2], self::$irreg);
+                    if ($idx !== false) {
+                        return $m[1] . $idx;
+                    }
                 }
                 else {
                     foreach (self::$suffixes as $sing => $plur) {
@@ -404,9 +409,9 @@
                 return $m[1];
             }
             else {
-                // ideally we should never get here, because it means we failed
-                // to find a way to singularize. we should return *something* in
-                // any case, however.
+                // ideally we should never get here, because it means we
+                // failed to find a way to singularize. we should return
+                // *something* in any case, however.
                 return $str;
             }
         }
