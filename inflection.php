@@ -348,12 +348,13 @@
                     if ($idx !== false) {
                         return $m[1] . $idx;
                     }
-                }
-                else {
-                    foreach (self::$suffixes as $sing => $plur) {
-                        if (preg_match("/$plur$/", $m[2], $mm)) {
-                            $pattern = "/(.*)$plur$/";
-                            return preg_replace($pattern, '\1' . $sing, $str);
+                    else {
+                        foreach (self::$suffixes as $sing => $plur) {
+                            if (preg_match("/$plur$/", $m[2], $mm)) {
+                                $pattern = "/(.*)$plur$/";
+                                return preg_replace($pattern, '\1' . $sing,
+                                                    $str);
+                            }
                         }
                     }
                 }
