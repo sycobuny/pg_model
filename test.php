@@ -5,7 +5,7 @@
     include_once('test/tap.php');
     $tests = 2;
 
-    $pid = posix_getpid();
+    $pid = getmypid();
     $cmd = "lsof -p $pid | grep txt | head -n1 | awk '{print \$9 }'";
     $bin = exec($cmd);
 
