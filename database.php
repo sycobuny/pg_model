@@ -197,24 +197,22 @@
         /**
          * Prepare identifiers for safe use in queries
          *
-         * Call a PostgreSQL server function to quote identifiers
-         * (table/column/function/etc. names). There's ideally a function to
-         * do this in the PHP core but it doesn't actually seem to exist. It
-         * takes a variable number of arguments and returns the results as an
-         * array where the keys are the original values and the values are the
-         * quoted versions. Note that sometimes these values will be the same,
-         * as the PG function only quotes identifiers when specifically
-         * necessary.
+         * Emulate a PostgreSQL server function to quote identifiers
+         * (table/column/function/etc. names). This is replacing a function
+         * intended to be in the PHP core, which does not seem to actually
+         * exist. It behaves similarly to the PostgreSQL function, which is to
+         * say, only identifiers which *need* quoting are actually quoted.
+         * Simple identifiers such as 'a' are not quoted, but case-sensitive
+         * ones such as 'A' are (a, vs. "A").
          *
          * @return array
          */
         public static function quote_identifiers() {
             $ret   = array();
-            $holds = array();
-            $args  = array();
+            $rem   = array();
+            $fargs = array();
 
             $in = func_get_args();
-            $fargs = array();
 
             foreach ($in as $arg) {
                 if (is_array($arg)) {
@@ -229,29 +227,25 @@
                 if (array_key_exists($arg, self::$quoted)) {
                     $ret[$arg] = self::$quoted[$arg];
                 }
+            }
+
+            foreach ($fargs as $arg) {
+                if (array_key_exists($arg, self::$quoted)) {
+                    $ret[$arg] = self::$quoted[$arg];
+                }
                 else {
-                    array_push($holds, '$' . (count($holds) + 1));
-                    array_push($args, $arg);
+                    array_push($rem, $arg);
                 }
             }
 
-            // we already found all args cached!
-            if (!count($args)) {
-                return $ret;
-            }
+            foreach ($rem as $uq) {
+                $qv = preg_replace('/\"/', '""', $uq);
+                if (preg_match('/^[^a-z_][a-z0-9_]*$/', $qv) ||
+                    preg_match('/"/', $qv)) {
+                    $qv = "\"$qv\"";
+                }
 
-            $unnest = 'ARRAY[' . join(', ', $holds) . ']';
-            $query  = 'SELECT u.i, pg_catalog.quote_ident(u.i) q FROM ' .
-                      "UNNEST($unnest) u(i)";
-            $name   = '_quote_identifiers_' . count($args);
-            $rows   = self::prefetch($query, $args, $name);
-
-            foreach ($rows as $row) {
-                $key = $row['i'];
-                $val = $row['q'];
-
-                $ret[$key] = $val;
-                self::$quoted[$key] = $val;
+                self::$quoted[$uq] = $ret[$uq] = $qv;
             }
 
             return $ret;
